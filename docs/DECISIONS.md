@@ -85,3 +85,4 @@ Estados: ⏳ pendiente (los agentes usan el default) · ✅ confirmada.
 | 2026-10-08 | Visitas sin pase con registro de documento y autorización en vivo pasan de Fase 1.5 al MVP; Q-06 y Q-08 actualizadas; Q-27…Q-35 nuevas | Dueño del producto + Claude |
 | 2026-10-16 | Nombre del producto: **Atrio** (reemplaza a Zaguán); código interno `atrio`, prefijo de token QR `AT1` | Dueño del producto |
 | 2026-10-16 | Dos repositorios (ADR-016) y GitHub Copilot como agente (ADR-017); M0 dividido en M0a (local) y M0b (staging) | Dueño del producto + Claude |
+
