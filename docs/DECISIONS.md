@@ -74,6 +74,11 @@ Estados: ⏳ pendiente (los agentes usan el default) · ✅ confirmada.
 | Q-33 | ¿La garita pasa de 2 a 3 botones principales? (desvío del requisito original) | Sí: Escanear QR · Ingresar código · Sin pase. El acceso manual se mueve dentro de "Sin pase" | WLK-01, §8.1 | ⏳ |
 | Q-34 | ¿Lista de personas restringidas en el MVP? | Sí, solo la administra el admin, con step-up, categoría y nota obligatorias | WLK-16 | ⏳ |
 | Q-35 | ¿Validar el DPI contra registros oficiales mediante un proveedor externo? | No en el MVP (cuesta por consulta y requiere fecha de nacimiento). Evaluar en Fase 2 como opción de pago por residencial | §6.5 | ⏳ |
+| Q-36 | ¿El código numérico de 8 dígitos se valida sin conexión? (#1) | **Sí, con mitigaciones:** se guarda cifrado a nivel de campo (SEC-52) para poder mostrarlo de nuevo; el paquete offline lleva el HMAC con una **clave distinta por paquete**, rotada con cada paquete, de 12 h; se apoya en SEC-33 (cotejo del nombre), PIN y revocación remota | SEC-34, SEC-44, OFF-03, ACC-05 | ✅ |
+| Q-37 | ¿Quién es el contacto principal (`is_primary`) de una unidad? (#2) | El **primer propietario aprobado**; si no hay, el primer residente aprobado. El admin puede cambiarlo. Al desactivarlo se reasigna automáticamente con la misma regla y se avisa al admin cuando el elegido no es propietario | SEC-26, REG-10, WLK-08, LIF-01 | ✅ |
+| Q-38 | ¿Cómo se concilia la supresión de datos con el audit log inmutable? (#3) | El audit log **no guarda PII**: solo ids y valores enmascarados. Los eventos sin residencial van en una cadena global `platform`. **Validar con abogado** | SEC-54, SEC-55, SEC-60, SEC-61 | ✅ |
+| Q-39 | ¿Cualquiera puede crear residenciales y qué pasa al terminar el piloto? (#4) | Autoservicio con Turnstile, máximo 2 residenciales por usuario y presupuesto de mensajería bajo en `trial`. El paso `trial` → `suspended` es **manual**, por endpoint interno auditado (ROL-13), hasta que exista facturación | EST-01, LIF-06, ROL-13, Q-12, Q-14 | ✅ |
+| Q-40 | ¿Qué validación de DPI se implementa en el MVP? (#5) | Solo **13 dígitos y códigos de departamento/municipio**. El dígito verificador del CUI queda detrás de un flag apagado hasta confirmar el algoritmo con fuente oficial (RENAP) | WLK-04, H9 | ✅ |
 
 ---
 
@@ -85,4 +90,6 @@ Estados: ⏳ pendiente (los agentes usan el default) · ✅ confirmada.
 | 2026-10-08 | Visitas sin pase con registro de documento y autorización en vivo pasan de Fase 1.5 al MVP; Q-06 y Q-08 actualizadas; Q-27…Q-35 nuevas | Dueño del producto + Claude |
 | 2026-10-16 | Nombre del producto: **Atrio** (reemplaza a Zaguán); código interno `atrio`, prefijo de token QR `AT1` | Dueño del producto |
 | 2026-10-16 | Dos repositorios (ADR-016) y GitHub Copilot como agente (ADR-017); M0 dividido en M0a (local) y M0b (staging) | Dueño del producto + Claude |
+| 2026-10-16 | Correcciones tras `/revisar-spec` en SPEC y AGENTS: garita de 3 botones (Q-33), autorización en vivo y salidas solo en MVP, vigencia del paquete offline configurable, `support-access` fuera de la ruta de tenant, ubicación de `tenancy` (puerto en `platform`, implementación en `modules`), operaciones sin tenant (§9.6.8) y `scope`/condición en `permissions.yaml`. Preguntas abiertas: issues #1…#5 | Dueño del producto + Copilot |
 
+| 2026-10-16 | Q-36…Q-40 confirmadas (issues #1…#5): código numérico offline con clave por paquete, contacto principal, audit log sin PII, alta de residenciales con límites y validación de DPI sin dígito verificador por ahora | Dueño del producto + Copilot |
