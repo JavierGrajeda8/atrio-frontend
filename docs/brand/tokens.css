@@ -1,0 +1,118 @@
+/* Atrio — design tokens (propuesta v1). Consumir solo los tokens semánticos en componentes. */
+
+:root {
+  /* ── Base ─────────────────────────────────────────── */
+  --anil-50: #EEF0FA;
+  --anil-100: #DCE0F5;
+  --anil-300: #8C96DA;
+  --anil-500: #4252B5;
+  --anil-600: #33419C;
+  --anil-700: #2A357F;
+  --anil-900: #1A2150;
+  --obsidiana: #141824;
+  --cal: #FAF7F2;
+  --blanco: #FFFFFF;
+  --piedra-100: #E8E4DD;
+  --piedra-300: #B5AEA2;
+  --piedra-600: #565149;
+  --maiz-400: #F2B33D;
+  --barro-600: #A84A28;
+  --jade-700: #0A6140;
+  --achiote-700: #A61B12;
+  --ambar-800: #8A5300;
+
+  /* ── Semánticos (modo claro) ──────────────────────── */
+  --color-bg: var(--cal);
+  --color-surface: var(--blanco);
+  --color-surface-muted: #F4F1EC;
+  --color-border: var(--piedra-100);
+  --color-border-strong: var(--piedra-300);
+  --color-text: var(--obsidiana);
+  --color-text-muted: var(--piedra-600);
+  --color-primary: var(--anil-600);
+  --color-primary-hover: var(--anil-700);
+  --color-on-primary: var(--blanco);
+  --color-primary-soft: var(--anil-50);
+  --color-accent: var(--maiz-400);
+  --color-accent-2: var(--barro-600);
+  --color-success: var(--jade-700);
+  --color-danger: var(--achiote-700);
+  --color-warning-text: var(--ambar-800);
+  --color-focus-ring: var(--anil-500);
+
+  /* Estados de garita (iguales en claro y oscuro: pantallas a color completo) */
+  --color-gate-granted-bg: var(--jade-700);
+  --color-gate-granted-fg: var(--blanco);
+  --color-gate-denied-bg: var(--achiote-700);
+  --color-gate-denied-fg: var(--blanco);
+  --color-gate-offline-bg: var(--maiz-400);
+  --color-gate-offline-fg: var(--obsidiana);
+
+  /* ── Tipografía ───────────────────────────────────── */
+  --font-display: "Bricolage Grotesque", "Atkinson Hyperlegible", system-ui, sans-serif;
+  --font-body: "Atkinson Hyperlegible", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+  --text-xs: 0.875rem;
+  --text-sm: 1rem;
+  --text-md: 1.125rem;
+  --text-lg: 1.25rem;
+  --text-xl: 1.5rem;
+  --text-2xl: 2rem;
+  --text-3xl: 2.5rem;
+  --text-gate: 3.5rem;
+
+  /* ── Espaciado, radios, sombras ───────────────────── */
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-6: 1.5rem;
+  --space-8: 2rem;
+  --space-12: 3rem;
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 16px;
+  --radius-arch: 999px 999px 12px 12px; /* forma de arco de los portales del atrio */
+  --shadow-1: 0 1px 2px rgb(20 24 36 / 0.08);
+  --shadow-2: 0 4px 16px rgb(20 24 36 / 0.10);
+  --touch-min: 44px;
+  --touch-gate: 56px;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --color-bg: #0F1220;
+    --color-surface: #181C2E;
+    --color-surface-muted: #141829;
+    --color-border: #2A2F45;
+    --color-border-strong: #3A405A;
+    --color-text: #ECEAF4;
+    --color-text-muted: #A9A6B8;
+    --color-primary: var(--anil-300);
+    --color-primary-hover: #A3ACE3;
+    --color-on-primary: #0F1220;
+    --color-primary-soft: #1F2546;
+    --color-success: #5CC79A;
+    --color-danger: #F2867C;
+    --color-warning-text: var(--maiz-400);
+    --color-accent-2: #E08A64;
+  }
+}
+
+:root[data-theme="dark"] {
+  --color-bg: #0F1220;
+  --color-surface: #181C2E;
+  --color-surface-muted: #141829;
+  --color-border: #2A2F45;
+  --color-border-strong: #3A405A;
+  --color-text: #ECEAF4;
+  --color-text-muted: #A9A6B8;
+  --color-primary: var(--anil-300);
+  --color-primary-hover: #A3ACE3;
+  --color-on-primary: #0F1220;
+  --color-primary-soft: #1F2546;
+  --color-success: #5CC79A;
+  --color-danger: #F2867C;
+  --color-warning-text: var(--maiz-400);
+  --color-accent-2: #E08A64;
+}
