@@ -33,7 +33,7 @@ Orden sugerido para las primeras 2 semanas. Lo marcado con ⏱ tarda días o sem
 
 ## 4. Preparar los repositorios (día 1–2)
 
-Tienes dos repos: `backend` y `frontend`. En lo que sigue, `JavierGrajeda8/atrio-backend` y `JavierGrajeda8/atrio-frontend` son sus nombres reales.
+Tienes dos repos: `atrio-backend` y `atrio-frontend`. En lo que sigue, `JavierGrajeda8/atrio-backend` y `JavierGrajeda8/atrio-frontend` son sus nombres reales.
 
 1. **Copiar los kits.** El contenido de `atrio-backend-kit` va a la raíz del repo backend y el de `atrio-frontend-kit` a la raíz del frontend. Haz este primer commit directo a `main`, antes de activar la protección.
 2. **Abrir ambos en VS Code.** Clona los dos repos lado a lado y abre `backend/atrio.code-workspace` (*File › Open Workspace from File*). Así el agente de VS Code ve los dos repos. Si tus carpetas no se llaman `backend` y `frontend`, ajusta las rutas en ese archivo.
