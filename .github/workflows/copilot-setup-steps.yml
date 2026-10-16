@@ -1,0 +1,49 @@
+name: "Copilot Setup Steps"
+
+# Prepara el entorno del agente de Copilot en la nube antes de que empiece a trabajar.
+# Se valida sola cuando cambia este archivo y se puede correr a mano desde Actions.
+# FR-02 la actualiza con los comandos reales del proyecto.
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - .github/workflows/copilot-setup-steps.yml
+  pull_request:
+    paths:
+      - .github/workflows/copilot-setup-steps.yml
+
+jobs:
+  # El job DEBE llamarse copilot-setup-steps o Copilot no lo usa.
+  copilot-setup-steps:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Node 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: pnpm
+        run: npm install -g pnpm@10
+
+      - name: Dependencias (cuando el proyecto ya existe)
+        run: |
+          if [ -f pnpm-lock.yaml ]; then
+            pnpm install --frozen-lockfile
+          elif [ -f package.json ]; then
+            pnpm install
+          else
+            echo "package.json todavía no existe: lo crea el issue FR-01."
+          fi
+
+      - name: Navegador para Playwright (cuando existe e2e/)
+        run: |
+          if [ -d e2e ] && [ -f package.json ]; then
+            pnpm exec playwright install --with-deps chromium || echo "Playwright aún no está instalado."
+          fi

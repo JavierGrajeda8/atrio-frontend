@@ -1,0 +1,35 @@
+name: "Guard synced files"
+
+# docs/ y openapi/ se editan solo en el repo backend (SPEC REP-01).
+# Este check falla si un PR los modifica desde una rama distinta a sync/backend.
+on:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  guard:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Verificar que no se editaron archivos sincronizados
+        env:
+          HEAD_REF: ${{ github.head_ref }}
+          BASE_REF: ${{ github.base_ref }}
+        run: |
+          if [ "$HEAD_REF" = "sync/backend" ]; then
+            echo "PR de sincronización: permitido."
+            exit 0
+          fi
+          changed=$(git diff --name-only "origin/$BASE_REF...HEAD" -- docs openapi | grep -v '^docs/SYNCED_FROM_BACKEND.md$' || true)
+          if [ -n "$changed" ]; then
+            echo "::error::Estos archivos se editan en el repo backend y llegan por el PR de sincronización:"
+            echo "$changed"
+            exit 1
+          fi
+          echo "Sin cambios en archivos sincronizados."

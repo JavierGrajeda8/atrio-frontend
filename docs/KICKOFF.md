@@ -33,7 +33,7 @@ Orden sugerido para las primeras 2 semanas. Lo marcado con ⏱ tarda días o sem
 
 ## 4. Preparar los repositorios (día 1–2)
 
-Tienes dos repos: `backend` y `frontend`. En lo que sigue, `OWNER/backend` y `OWNER/frontend` son sus nombres reales.
+Tienes dos repos: `backend` y `frontend`. En lo que sigue, `JavierGrajeda8/atrio-backend` y `JavierGrajeda8/atrio-frontend` son sus nombres reales.
 
 1. **Copiar los kits.** El contenido de `atrio-backend-kit` va a la raíz del repo backend y el de `atrio-frontend-kit` a la raíz del frontend. Haz este primer commit directo a `main`, antes de activar la protección.
 2. **Abrir ambos en VS Code.** Clona los dos repos lado a lado y abre `backend/atrio.code-workspace` (*File › Open Workspace from File*). Así el agente de VS Code ve los dos repos. Si tus carpetas no se llaman `backend` y `frontend`, ajusta las rutas en ese archivo.
@@ -50,7 +50,7 @@ atrio/
    - Entornos `staging` (automático) y `production` (aprobación obligatoria tuya).
 5. **Etiquetas y milestones** en ambos repos, con la CLI de GitHub:
 ```bash
-for r in OWNER/backend OWNER/frontend; do
+for r in JavierGrajeda8/atrio-backend JavierGrajeda8/atrio-frontend; do
   for l in "agent:ready:0E8A16" "agent:in-progress:FBCA04" "needs-decision:D93F0B" \
            "needs-human-review:5319E7" "needs-api:C5DEF5" "breaking-api:B60205" \
            "blocked:B60205" "security-critical:B60205" "sync:EDEDED" \
@@ -65,7 +65,7 @@ for r in OWNER/backend OWNER/frontend; do
 done
 ```
 6. **Conectar los repos:**
-   - Crea un token *fine-grained* con acceso **solo** al repo frontend (permisos: Contents y Pull requests en lectura/escritura). Guárdalo en el backend como secreto `FRONTEND_SYNC_TOKEN` y crea la variable `FRONTEND_REPO` = `OWNER/frontend` (*Settings › Secrets and variables › Actions*).
+   - Crea un token *fine-grained* con acceso **solo** al repo frontend (permisos: Contents y Pull requests en lectura/escritura). Guárdalo en el backend como secreto `FRONTEND_SYNC_TOKEN` y crea la variable `FRONTEND_REPO` = `JavierGrajeda8/atrio-frontend` (*Settings › Secrets and variables › Actions*).
    - Cuando el backend publique su imagen en GHCR (issue BE-10), da acceso de lectura al repo frontend desde la configuración del paquete, para que el E2E pueda descargarla.
 7. **Variables para el agente en la nube (backend):** en la configuración de Copilot del repo (variables del entorno de agentes), crea `TEST_DATABASE_URL` = `postgresql://atrio:atrio_dev_only@localhost:5432/atrio`, que apunta al PostgreSQL que levanta `copilot-setup-steps.yml`. Son credenciales solo de prueba.
 8. **Probar la base:** en *Actions* de cada repo corre a mano **Copilot Setup Steps**, que debe terminar en verde aunque el repo esté vacío. En el backend corre **Sync to frontend**: debe terminar en verde. Como el frontend ya trae una copia de `docs/`, no abrirá PR hasta que algo cambie; pruébalo editando una línea de `docs/DECISIONS.md` en el backend.
