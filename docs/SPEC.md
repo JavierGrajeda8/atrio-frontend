@@ -36,7 +36,7 @@ Plataforma SaaS multi-tenant que digitaliza **la puerta de entrada** del residen
 
 ### 1.3 Principios de producto (orden de prioridad)
 1. **P1 — Seguridad por diseño.** El sistema decide quién entra a hogares. Ante conflicto entre comodidad y seguridad gana la seguridad; la fricción se compensa con buen UX, no relajando controles.
-2. **P2 — Simplicidad extrema por rol.** El guardia ve 2 botones. El residente crea una visita en < 20 s. El admin activa su residencial sin llamar a soporte.
+2. **P2 — Simplicidad extrema por rol.** El guardia ve 3 botones (Escanear QR · Ingresar código · Sin pase; `DECISIONS.md` Q-33). El residente crea una visita en < 20 s. El admin activa su residencial sin llamar a soporte.
 3. **P3 — La garita nunca se detiene.** Sin internet, la garita sigue validando de forma segura y sincroniza después.
 4. **P4 — Trazabilidad total.** Toda acción relevante queda en una bitácora inmutable y verificable.
 5. **P5 — WhatsApp es canal de distribución, no de conversación.** Notificamos por WhatsApp y llevamos la acción a la app.
@@ -48,7 +48,7 @@ Plataforma SaaS multi-tenant que digitaliza **la puerta de entrada** del residen
 - Activación < 2 horas (plantillas + Excel + invitaciones distribuidas).
 - Seguridad verificable: QR firmados criptográficamente, dispositivos de garita enrolados, bitácora a prueba de manipulación, MFA para administradores.
 - Garita offline-first.
-- UX de guardia de 2 botones con feedback a pantalla completa.
+- UX de guardia de 3 botones con feedback a pantalla completa.
 - Cada visitante es un touchpoint de marca (loop viral).
 
 ### 1.5 Contexto competitivo (honesto)
@@ -133,7 +133,7 @@ El código, la UI, los issues y la documentación DEBEN usar estos términos. En
 - **ROL-01** El rol NO es atributo global del usuario. Se modela como `membership(user, residential, role)`; un usuario puede ser admin en un residencial y residente en otro, o **ambos en el mismo** (caso común: el admin vive ahí). Restricción: `UNIQUE(user_id, residential_id, role)`.
 - **ROL-02** El sub-rol de residente (propietario, inquilino, familiar) vive en `unit_assignment`, no en la membresía: una persona puede ser propietaria de una unidad e inquilina de otra.
 - **ROL-03** La autorización de una petición evalúa la **unión de permisos** de las membresías **activas** del usuario en el residencial de la ruta. El `audit_log` registra la membresía cuyo permiso habilitó la acción.
-- **ROL-04** Los permisos son constantes en código (`visits.create`, `access.validate`…). Los roles son **paquetes de permisos** definidos en un único archivo fuente (`permissions.yaml`) que genera: la matriz de esta sección, los tests de autorización y la documentación. No hay ACLs arbitrarias en Fase 1.
+- **ROL-04** Los permisos son constantes en código (`visits.create`, `access.validate`…). Los roles son **paquetes de permisos** definidos en un único archivo fuente (`permissions.yaml`) que genera: la matriz de esta sección, los tests de autorización y la documentación. No hay ACLs arbitrarias en Fase 1. Cada acción declara su permiso, su `scope` (`own` = lo propio, `unit` = su unidad, `all`) y, si aplica, una condición de dominio (las celdas 🔸 y ⚙ de la matriz); `require("…")` valida el permiso y el scope, y las condiciones se evalúan en `domain/` con prueba propia.
 - **ROL-05** Fases 2+: los roles nuevos (tesorero, junta, recepcionista, proveedor) se agregan como **nuevos paquetes**, no como excepciones en código. Roles personalizados por residencial solo si la demanda lo justifica (Fase 4+).
 
 ### 4.2 Matriz de permisos (rol × acción × módulo)
@@ -189,7 +189,7 @@ Notas:
 2. El propietario puede **solicitar** el alta de inquilinos/familiares en su unidad; la aprobación final es del admin salvo que el residencial active `auto_approve_owner_invites` (default: desactivado; ver `DECISIONS.md`).
 3. El admin crea visitas **administrativas** (contratistas de áreas comunes) sin unidad asociada y responde las solicitudes de ingreso dirigidas a "Administración".
 4. Familiar: permitido por defecto para crear visitas; configurable por residencial. Para pagos y reservas: desactivado por defecto.
-5. Recepcionista registra una visita a nombre de una unidad solo tras confirmación del residente (autorización en vivo, Fase 1.5).
+5. Recepcionista registra una visita a nombre de una unidad solo tras confirmación del residente (autorización en vivo, WLK-07…14).
 6. Solo visitas esperadas/accesos de **sus garitas asignadas** y del **turno en curso**.
 7. Solo desde un **dispositivo de garita enrolado** y con turno iniciado.
 8. Justificación escrita obligatoria; notificación inmediata al residente de la unidad y al admin; límite diario configurable con alerta.
@@ -273,14 +273,14 @@ Atrio controla la puerta de entrada a hogares. Una falla de seguridad no es un b
 - **SEC-23** El rol de base de datos de la aplicación no es dueño de las tablas y no tiene `BYPASSRLS`. Las migraciones usan un rol distinto. Los workers fijan el tenant de cada evento igual que la API.
 - **SEC-24** Claves de caché, objetos en almacenamiento (`r/{residential_id}/…`) y canales de tiempo real llevan prefijo de tenant. Las URLs prefirmadas se generan solo después de autorizar y expiran en ≤ 5 min.
 - **SEC-25** **Suite de aislamiento obligatoria**: para cada endpoint registrado, un test automático intenta acceder con credenciales del residencial A a recursos del residencial B y espera 404. Corre en cada PR.
-- **SEC-26** Aprobar una nueva persona en una unidad notifica al propietario principal de esa unidad ("Se aprobó a X en tu unidad").
+- **SEC-26** Aprobar una nueva persona en una unidad notifica al contacto principal de esa unidad (`is_primary`, REG-10) ("Se aprobó a X en tu unidad").
 
 ### 5.5 Credenciales de acceso (QR, código y link del visitante)
 - **SEC-30** **QR firmado.** El QR contiene un token compacto `AT1.<payload>.<firma>` con firma **Ed25519** (o ECDSA P-256 si el proveedor de KMS lo exige). Payload mínimo y **sin datos personales**: versión, id corto del residencial, `kid`, id de visita, nonce de 96 bits, `nbf`, `exp`, `max_uses`. Clave de firma **por residencial**, rotación anual o inmediata ante sospecha; las claves retiradas siguen verificando hasta que vence el último pase firmado con ellas. La clave privada se guarda cifrada con *envelope encryption* (una sola CMK de KMS); se descifra en memoria al firmar.
 - **SEC-31** La vigencia por defecto es desde ahora hasta las 23:59 (zona horaria del residencial); máximo configurable (default 7 días). `max_uses` por defecto = 1. Ningún pase es permanente.
 - **SEC-32** La base de datos no guarda la imagen del QR: guarda `kid` y nonce; el QR se regenera del token al mostrarlo.
 - **SEC-33** Al validar, el guardia **siempre** ve nombre del visitante, unidad destino y tipo de visita para cotejar con la persona (y documento de identidad si el residencial lo exige).
-- **SEC-34** Código numérico de **8 dígitos** (se muestra `4821-0937`), único entre visitas activas del residencial, guardado como HMAC con *pepper*. 5 intentos fallidos en 10 min en una garita → bloqueo de la entrada manual de códigos en esa garita por 10 min (el QR sigue funcionando) + alerta al admin.
+- **SEC-34** Código numérico de **8 dígitos** (se muestra `4821-0937`), único entre visitas activas del residencial, guardado como HMAC con *pepper* (para buscar) y **cifrado a nivel de campo** (SEC-52) para poder mostrarlo de nuevo en la página del pase y en "mis visitas" (`DECISIONS.md` Q-36). 5 intentos fallidos en 10 min en una garita → bloqueo de la entrada manual de códigos en esa garita por 10 min (el QR sigue funcionando) + alerta al admin.
 - **SEC-35** **Link del visitante:** `https://pase.<dominio>/#<share_token>`; token aleatorio de 128 bits **en el fragmento** (no llega a logs, CDN ni `Referer`). La página lo canjea por `POST`. Página con `noindex`, `Referrer-Policy: no-referrer`, rate limit por IP, y **sin** nombre del residente ni número de unidad (salvo configuración explícita). Al cancelar la visita, el link deja de funcionar.
 - **SEC-36** **Acceso manual de emergencia** (ambulancia, bomberos, residente sin forma de responder; los visitantes no anunciados normales siguen el flujo WLK): justificación de mínimo 15 caracteres + unidad destino + nombre del visitante; notificación push inmediata al residente con "Reconozco / No reconozco" (si no reconoce → alerta urgente al admin); límite diario por garita (default 10) con alerta al excederse; aparece en reporte diario al admin.
 - **SEC-37** Cancelar una visita la revoca en ≤ 60 s en todos los dispositivos de garita conectados (lista de revocación delta) y en el próximo sincronizado para los offline.
@@ -292,7 +292,7 @@ Atrio controla la puerta de entrada a hogares. Una falla de seguridad no es un b
 - **SEC-41** Todas las peticiones del dispositivo usan **DPoP (RFC 9449)**: el token está ligado a la clave del dispositivo; un token robado no sirve en otro equipo.
 - **SEC-42** **Turno con PIN:** cada guardia tiene su propia membresía y un PIN de 6 dígitos (argon2id, 5 intentos, bloqueo progresivo). El primer PIN se define con OTP al teléfono del guardia. Cada acceso registra guardia **y** dispositivo. Bloqueo automático tras 15 min de inactividad (re-ingreso con PIN).
 - **SEC-43** **Revocación remota** inmediata desde el panel admin (step-up): invalida sesiones, borra el caché local al siguiente contacto y rechaza toda petición posterior.
-- **SEC-44** **Datos mínimos en caché:** solo visitas de la garita para las próximas 24 h con: id, nombre del visitante (nombre + inicial del apellido), código de unidad, ventana de vigencia, usos y HMAC del código numérico; más los **prefijos de 32 bits del HMAC** de identidades restringidas (cada prefijo corresponde a muchos números posibles, así que el dispositivo no permite recuperar los documentos; una coincidencia offline se trata como alerta y se confirma al sincronizar). **Sin teléfonos**, salvo que el admin active `access.offline_cache_contact_phones` (solo contacto principal por unidad). El paquete offline está firmado por el servidor, vence en 12 h y el dispositivo guarda el offset de reloj del servidor; si detecta que el reloj local retrocedió, entra en modo restringido.
+- **SEC-44** **Datos mínimos en caché:** solo visitas de la garita para las próximas 24 h con: id, nombre del visitante (nombre + inicial del apellido), código de unidad, ventana de vigencia, usos y HMAC del código numérico (calculado con una **clave distinta por paquete**, rotada con cada paquete; `DECISIONS.md` Q-36); más los **prefijos de 32 bits del HMAC** de identidades restringidas (cada prefijo corresponde a muchos números posibles, así que el dispositivo no permite recuperar los documentos; una coincidencia offline se trata como alerta y se confirma al sincronizar). **Sin teléfonos**, salvo que el admin active `access.offline_cache_contact_phones` (solo contacto principal por unidad). El paquete offline está firmado por el servidor, vence según `access.offline_bundle_hours` (default 12 h, máx. 24 h) y el dispositivo guarda el offset de reloj del servidor; si detecta que el reloj local retrocedió, entra en modo restringido.
 - **SEC-45** El paquete offline expirado deshabilita la validación offline de QR/código y guía al guardia al protocolo manual (llamar al residente + acceso manual justificado).
 
 ### 5.7 Protección de datos personales
@@ -306,8 +306,8 @@ Guatemala aún no tiene una ley general de protección de datos personales (hay 
 - **SEC-56** Los logs técnicos **nunca** contienen OTP, tokens, códigos de visita, payload de QR, contraseñas/PIN, números de documento ni teléfonos completos (se enmascaran: `+502 ****-1234`). Un test de logging lo verifica.
 
 ### 5.8 Auditoría a prueba de manipulación
-- **SEC-60** `audit_log` registra toda acción de escritura o cambio de estado y todo acceso sensible de lectura (exportaciones, revelar códigos, acceso de soporte): quién, qué, cuándo, desde dónde (IP, user-agent, dispositivo), `request_id`, valor anterior y nuevo.
-- **SEC-61** **Cadena de hashes por residencial:** `hash = SHA-256(prev_hash ‖ registro canónico)`. Un job diario verifica la cadena y publica el hash de cierre del día en un bucket con **Object Lock (WORM)**.
+- **SEC-60** `audit_log` registra toda acción de escritura o cambio de estado y todo acceso sensible de lectura (exportaciones, revelar códigos, acceso de soporte): quién, qué, cuándo, desde dónde (IP, user-agent, dispositivo), `request_id`, y el cambio (valor anterior y nuevo) **sin PII**: solo ids y valores enmascarados (`DECISIONS.md` Q-38).
+- **SEC-61** **Cadena de hashes por residencial** (más una cadena global `platform` para eventos sin residencial, con `residential_id` nulo; las escrituras de cada cadena se serializan con un lock): `hash = SHA-256(prev_hash ‖ registro canónico)`. Un job diario verifica la cadena y publica el hash de cierre del día en un bucket con **Object Lock (WORM)**.
 - **SEC-62** El rol de BD de la aplicación solo tiene `INSERT`/`SELECT` sobre `audit_log`; un trigger rechaza `UPDATE`/`DELETE`.
 - **SEC-63** Nunca hay borrado físico de datos operativos: soft delete o cambios de estado.
 
@@ -363,7 +363,7 @@ Si se integra con talanqueras/plumas/torniquetes: controlador local que valida t
 ## 6. Requisitos funcionales — Fase 1 (MVP)
 
 ### 6.1 Estructura del residencial (EST)
-- **EST-01** Cualquier usuario autenticado puede crear un residencial: nombre, tipo (`condominio | torre | ofibodega | colonia`), dirección, zona horaria (default `America/Guatemala`), idioma (default `es-GT`), logo opcional. El creador queda como admin activo y **debe configurar MFA** antes de operar.
+- **EST-01** Cualquier usuario autenticado puede crear un residencial: nombre, tipo (`condominio | torre | ofibodega | colonia`), dirección, zona horaria (default `America/Guatemala`), idioma (default `es-GT`), logo opcional. El creador queda como admin activo y **debe configurar MFA** antes de operar. Anti-abuso (`DECISIONS.md` Q-39): Turnstile, máximo 2 residenciales por usuario y presupuesto de mensajería reducido mientras el residencial esté en `trial`.
 - **EST-02** Plantillas por tipo que pre-configuran el asistente y los defaults: *condominio* (casas, sectores opcionales), *torre* (sector por torre, códigos tipo `T1-0502`), *ofibodega* (oficinas/bodegas/locales), *colonia* (manzanas como sectores, lotes como unidades).
 - **EST-03** Sectores: CRUD con un nivel de anidación opcional (ej.: Fase 2 → Torre B).
 - **EST-04** Unidades: CRUD; código único en el residencial; tipo; sector opcional. Unidades con historial solo se desactivan, nunca se eliminan.
@@ -408,7 +408,7 @@ Si se integra con talanqueras/plumas/torniquetes: controlador local que valida t
 - **REG-07** Estados de membresía: `pending → active | rejected`; `active → suspended → active`; `active | suspended → deactivated` (terminal: se requiere nueva invitación).
 - **REG-08** El propietario puede invitar inquilinos y familiares a **su** unidad; la solicitud queda pendiente de aprobación del admin (salvo `auto_approve_owner_invites`).
 - **REG-09** Los guardias los crea el admin (nombre + teléfono). El guardia recibe un link, verifica OTP y define su PIN (SEC-42). No usan códigos de invitación.
-- **REG-10** Una unidad puede tener varios residentes; uno es el contacto principal (`is_primary`) para avisos operativos (acceso manual, visitas sin anunciar).
+- **REG-10** Una unidad puede tener varios residentes; uno es el contacto principal (`is_primary`) para avisos operativos (acceso manual, visitas sin anunciar). Por defecto es el primer propietario aprobado y, si no hay, el primer residente aprobado; el admin puede cambiarlo. Al desactivarlo se reasigna con la misma regla y se avisa al admin si el elegido no es propietario (`DECISIONS.md` Q-37).
 
 ### 6.4 Control de accesos (ACC)
 - **ACC-01** El residente crea una visita con: nombre del visitante (obligatorio), tipo (`visita | delivery | servicio | transporte | otro`), teléfono (opcional), ventana de vigencia (default: ahora → 23:59), usos (default 1), placa (opcional), nota para garita (opcional) y unidad (si tiene varias). El caso por defecto toma **≤ 3 toques**.
@@ -444,13 +444,13 @@ Objetivo: captura en garita < 30 s; mediana hasta la respuesta del residente < 6
 - **WLK-01** Tercer botón principal **"SIN PASE"** junto a "Escanear QR" e "Ingresar código" (ver `DECISIONS.md` Q-33). El guardia decide con una sola pregunta: *¿trae pase?*
 - **WLK-02** Unidad destino con teclado y búsqueda por código, más las unidades recientes del turno; opción "Administración" (la responde un admin). Si la unidad no tiene residentes activos no se puede pedir autorización: se ofrece contactar a la administración o el acceso manual.
 - **WLK-03** Tipo con botones grandes: Visita, Delivery/mensajero, Servicio técnico, Transporte (taxi/app), Otro. Para delivery se elige la empresa de una lista configurable por el admin (sembrada con las más comunes del país, a validar en el piloto) o "Otra".
-- **WLK-04** Documento (según `access.id_capture`; por defecto obligatorio en visitas sin pase): tipo (`dpi | licencia | pasaporte | carne | otro`), número con teclado numérico grande y nombre completo. Para DPI se valida que tenga 13 dígitos, el dígito verificador del CUI y códigos de departamento/municipio válidos (confirmar el algoritmo con fuente oficial al implementar) para atrapar errores de digitación. Si ese documento ya visitó el residencial, **el nombre se autocompleta** (búsqueda por índice ciego). Placa opcional.
+- **WLK-04** Documento (según `access.id_capture`; por defecto obligatorio en visitas sin pase): tipo (`dpi | licencia | pasaporte | carne | otro`), número con teclado numérico grande y nombre completo. Para DPI se valida que tenga 13 dígitos y códigos de departamento/municipio válidos para atrapar errores de digitación; el dígito verificador del CUI queda detrás de un flag apagado hasta confirmar el algoritmo con fuente oficial (`DECISIONS.md` Q-40). Si ese documento ya visitó el residencial, **el nombre se autocompleta** (búsqueda por índice ciego). Placa opcional.
 - **WLK-05** Foto opcional según `access.id_photo` (`off` por defecto | `document` | `visitor`): cifrada, retenida 30 días, visible solo para admins con step-up.
 - **WLK-06** Al ingresar el documento se verifica la lista de restringidos (WLK-16) antes de continuar.
 
 **Autorización en vivo**
 - **WLK-07** "Solicitar autorización" crea una `access_request` (vence a los 300 s) y notifica **en paralelo** a todos los residentes activos de la unidad con permiso (propietario, inquilino y familiar si `access.family_can_authorize`), con push urgente que ignora horas de silencio.
-- **WLK-08** Escalamiento automático configurable: sin respuesta a los 45 s → WhatsApp con botones al contacto principal (plantilla de utilidad, consume presupuesto de mensajería); a los 120 s la garita sugiere "Llamar al residente" (revela el teléfono, auditado, como en ACC-08); a los 300 s la solicitud vence.
+- **WLK-08** Escalamiento automático configurable: sin respuesta (ningún residente ha autorizado ni rechazado, aunque haya abierto el push) a los 45 s → WhatsApp con botones al contacto principal (plantilla de utilidad, consume presupuesto de mensajería); a los 120 s la garita sugiere "Llamar al residente" (revela el teléfono, auditado, como en ACC-08); a los 300 s la solicitud vence.
 - **WLK-09** Respuestas del residente: **Autorizar** · **Autorizar y permitir reingreso hoy** (crea una visita hasta las 23:59 ligada a la identidad, con usos configurables) · **Salgo a recoger** · **Dejar en garita** (solo delivery; en Fase 1 solo se registra, sin custodia de paquetes) · **Rechazar** (motivo opcional). La primera respuesta gana; los demás residentes ven "Ya respondió Ana: Autorizado".
 - **WLK-10** La pantalla de solicitud del residente muestra nombre, tipo, empresa, garita, documento enmascarado (`DPI ••••4521`), foto si existe y hora. El push **abre la pantalla**; nunca se aprueba desde la notificación sin una sesión válida.
 - **WLK-11** Respuesta por WhatsApp: cada botón lleva un token de un solo uso; se acepta solo si el número que responde pertenece a un residente activo de esa unidad y la solicitud sigue pendiente.
@@ -513,7 +513,7 @@ Objetivo: captura en garita < 30 s; mediana hasta la respuesta del residente < 6
 - **LIF-03** **Baja del residencial:** el admin la solicita (step-up + confirmación escrita del nombre) → `closed`, acceso bloqueado para todos, exportación disponible al admin 30 días, retención según política y luego seudonimización.
 - **LIF-04** **Guardia se retira:** asignaciones inactivas, membresía desactivada, sesiones revocadas, PIN eliminado.
 - **LIF-05** **Dispositivo perdido:** revocación remota (SEC-43).
-- **LIF-06** **Suspensión por falta de pago del servicio Atrio:** funciones administrativas limitadas, pero **la validación en garita sigue funcionando 30 días** con avisos; nunca se corta la garita de forma abrupta.
+- **LIF-06** **Suspensión por falta de pago del servicio Atrio:** funciones administrativas limitadas, pero **la validación en garita sigue funcionando 30 días** con avisos; nunca se corta la garita de forma abrupta. Mientras no exista facturación, el paso `trial` → `suspended` lo ejecuta el personal de plataforma por un endpoint interno auditado (ROL-13; `DECISIONS.md` Q-39).
 
 ### 6.11 Internacionalización (I18N)
 - **I18N-01** Todo texto visible al usuario externalizado desde el día 1 con mensajes ICU (frontend y mensajes de error del backend, que se identifican por `code`).
@@ -658,7 +658,7 @@ flowchart LR
 
 | Módulo | Responsabilidad | Fase |
 |---|---|---|
-| `platform` | Configuración, BD, contexto de tenant, errores, i18n, audit log, outbox, archivos, flags, rate limiting | 1 |
+| `platform` | Configuración, BD, contexto de tenant (`platform/tenancy`: `TenantContext`, RLS y un puerto de resolución de membresías que implementa el módulo `tenancy`), errores, i18n, audit log, outbox, archivos, flags, rate limiting | 1 |
 | `identity` | Usuarios, OTP, sesiones, MFA/passkeys, step-up, dispositivos de garita, PIN | 1 |
 | `tenancy` | Residenciales, membresías, permisos, invitaciones, aprobaciones, transferencia de admin, break-glass | 1 |
 | `structure` | Sectores, unidades, garitas, importaciones Excel | 1 |
@@ -671,7 +671,7 @@ flowchart LR
 | `messaging` | Conversaciones, mensajes, encuestas | 4 |
 
 Reglas:
-- **ARC-01** Cada módulo expone una interfaz pública (`<modulo>/api.py`: servicios y DTOs) y sus eventos (`<modulo>/events.py`). Ningún módulo importa internos de otro. Contratos verificados con **import-linter** en CI.
+- **ARC-01** Cada módulo expone una interfaz pública (`<modulo>/api.py`: servicios y DTOs) y sus eventos (`<modulo>/events.py`). Ningún módulo importa internos de otro. Contratos verificados con **import-linter** en CI. `platform` nunca importa módulos: define puertos (p. ej. la resolución de membresías de `platform/tenancy`) y los módulos los implementan, inyectados al arrancar.
 - **ARC-02** Comunicación entre módulos: llamada síncrona a la interfaz pública **o** evento de dominio asíncrono. Nunca consultas SQL a tablas de otro módulo.
 - **ARC-03** Capas dentro de cada módulo: `domain/` (entidades, máquinas de estado, reglas puras, sin I/O) → `application/` (casos de uso, transacciones) → `infrastructure/` (repositorios, adaptadores) → `http/` (routers, esquemas).
 - **ARC-04** Las máquinas de estado (membresía, visita, cargo, pago, reserva) se implementan como tablas de transiciones explícitas en `domain/`, con test por cada transición válida e inválida.
@@ -682,7 +682,7 @@ Reglas:
 ```
 backend/
 ├─ src/atrio/
-│  ├─ platform/                # núcleo transversal
+│  ├─ platform/                # núcleo transversal (incluye tenancy/: contexto de tenant y RLS)
 │  ├─ modules/
 │  │  ├─ identity/  tenancy/  structure/  access/  comms/  insights/
 │  │  └─ (fase 2+) billing/  automation/  reservations/  messaging/
@@ -745,6 +745,7 @@ CREATE POLICY own_memberships ON memberships FOR SELECT
 5. Tablas globales (sin RLS de tenant): `users`, `sessions`, `otp_challenges`, `user_credentials`, `push_subscriptions`, `feature_flags` globales. Se acceden solo vía el módulo `identity`/`platform`.
 6. Workers: cada evento lleva `residential_id`; el handler abre su transacción con ese contexto. Las tareas verdaderamente globales (purga de retención) usan un rol de BD dedicado `atrio_maintenance` con permisos mínimos y auditoría.
 7. FKs compuestas, por ejemplo: `FOREIGN KEY (residential_id, unit_id) REFERENCES units (residential_id, id)`.
+8. **Operaciones sin tenant** (lista cerrada, cada una con prueba): crear residencial (EST-01), listar mis membresías, canjear una invitación, enrolar un dispositivo, resolver el token del pase, procesar webhooks y registrar intentos cross-tenant (SEC-67). Se implementan con funciones `SECURITY DEFINER` mínimas y un rol dedicado; nunca con `BYPASSRLS`. En `residentials` la política RLS es por `id`. La decisión se fija en `docs/adr/0002-tenancy.md` (BE-05) antes de escribir el código.
 
 ### 9.7 Eventos, outbox y trabajos
 - **ARC-10** Todo cambio de estado relevante escribe, **en la misma transacción**, la fila de negocio + `audit_log` + `outbox_events`.
@@ -880,7 +881,7 @@ device_enrollment_codes(id, residential_id, gate_id, code_hash, created_by_membe
 visits(id, residential_id, unit_id?, purpose[unit_visit|administrative|walk_in_reentry], identity_id?,
   created_by_membership_id, visitor_name, visitor_phone_ciphertext?,
   visitor_type[visita|delivery|servicio|transporte|otro], vehicle_plate?, notes?,
-  kid, token_nonce UNIQUE, numeric_code_lookup, share_token_hash UNIQUE,
+  kid, token_nonce UNIQUE, numeric_code_lookup, numeric_code_ciphertext, share_token_hash UNIQUE,
   allowed_gate_ids uuid[]?, valid_from, valid_until, max_uses=1, uses=0,
   status[active|used|expired|cancelled], cancelled_at?, cancelled_by_membership_id?,
   cancel_reason?, created_at)
@@ -1048,7 +1049,7 @@ Prefijo `R` = `/api/v1/residentials/{rid}`.
 | `POST R/announcements/{id}:read` | `announcements.read` | |
 | `GET R/dashboard/summary` · `GET R/metrics/adoption` | `dashboard.read` | |
 | `GET R/audit-logs` | `audit.read` | |
-| `POST R/support-access` | personal de plataforma | Break-glass |
+| `POST /api/v1/platform/support-access` | personal de plataforma | Break-glass (ROL-10…13); fuera de la ruta de tenant porque el personal no tiene membresía (SEC-20); el `residential_id` va en el cuerpo |
 | `POST /api/v1/webhooks/{whatsapp,twilio,ses}` | firma del proveedor | Verificación de firma obligatoria; WhatsApp procesa además los botones de autorización (SEC-39) |
 | `GET /healthz` · `GET /readyz` | público | Sin información sensible |
 
@@ -1188,7 +1189,7 @@ FRONTEND — merge a main → staging automático → ⏸ tu aprobación → pro
 | Configuración / infraestructura | 0 | ≤ 4 h | Terraform en Git |
 
 - **DR-01** Ensayo de restauración completo en staging cada trimestre con registro del tiempo real obtenido.
-- **DR-02** Si la región cae, la garita sigue operando offline hasta 12 h (paquete vigente), dentro del RTO de región.
+- **DR-02** Si la región cae, la garita sigue operando offline mientras el paquete esté vigente (12 h por defecto), dentro del RTO de región.
 
 ---
 
@@ -1491,7 +1492,7 @@ admin_tasks(id, residential_id, kind, title, ref_type?, ref_id?, status[open|don
 **Roadmap en 3 etapas (tras el piloto de la Fase 1)**
 | Etapa | Duración | Contenido | Criterio de salida | Depende de |
 |---|---|---|---|---|
-| 1 | 3–4 meses | Fase 1.5 (autorización en vivo, salidas, pases recurrentes, Capacitor); plataforma (entitlements, RBAC extendido, núcleo de automatizaciones, preferencias de notificación); pagos núcleo (cargos masivos, saldos iniciales, comprobantes, conciliación con doble control, estado de cuenta, constancias, recordatorios, reportes, exportación FEL) | 2 ciclos de cobro conciliados en ≥ 3 residenciales beta | Fase 1 en producción |
+| 1 | 3–4 meses | Fase 1.5 (lectura del documento con cámara, restricciones por unidad, alertas de permanencia, pases recurrentes, Capacitor; la autorización en vivo y las salidas ya están en el MVP, §3); plataforma (entitlements, RBAC extendido, núcleo de automatizaciones, preferencias de notificación); pagos núcleo (cargos masivos, saldos iniciales, comprobantes, conciliación con doble control, estado de cuenta, constancias, recordatorios, reportes, exportación FEL) | 2 ciclos de cobro conciliados en ≥ 3 residenciales beta | Fase 1 en producción |
 | 2 | 3–4 meses | Reservas completas; una pasarela de pago en línea; mora automática; presets de reservas | Reservas en GA; ≥ 20 % de pagos en línea en betas | Pagos núcleo |
 | 3 | 3–4 meses | Mensajería (comunicados con confirmación, chat 1:1 con contexto, encuestas), distribución por WhatsApp, consolidación y digest; FEL directo si hay demanda; parámetros avanzados de automatización | Chat en GA; tasa de lectura de comunicados ≥ 60 % | Automatizaciones núcleo |
 
@@ -1603,7 +1604,7 @@ Escenario: Conflicto por cancelación previa
   Y el admin recibe una alerta de conflicto
 
 Escenario: Paquete vencido
-  Dado que el paquete offline tiene más de 12 horas
+  Dado que el paquete offline superó su vigencia (12 horas por defecto)
   Cuando escaneo un QR sin conexión
   Entonces la app no lo valida y muestra el protocolo manual
 ```
@@ -1718,7 +1719,7 @@ Escenario: Dejar en garita
   Entonces la garita muestra "RECIBIR EN GARITA" y el mensajero no ingresa
 
 Escenario: Escalamiento a WhatsApp
-  Dado que nadie abrió el push en 45 segundos
+  Dado que nadie respondió el push en 45 segundos
   Entonces el contacto principal recibe un WhatsApp con botones "Autorizar", "Salgo a recoger" y "Rechazar"
   Y si responde "Autorizar" desde su número registrado, la garita muestra "ADELANTE · autorizó por WhatsApp"
   Y una respuesta desde un número que no pertenece a la unidad se ignora y se registra como evento de seguridad
@@ -1739,7 +1740,7 @@ Escenario: Documento conocido
   Entonces el nombre se autocompleta
 
 Escenario: Documento mal digitado
-  Cuando el guardia digita un DPI con dígito verificador inválido
+  Cuando el guardia digita un DPI con longitud o códigos de departamento/municipio inválidos
   Entonces la app pide revisar el número antes de continuar
 
 Escenario: Persona restringida
@@ -1814,7 +1815,7 @@ Instrumentación: los eventos de dominio alimentan el módulo `insights`; la ana
 | Riesgo | Tipo | Prob. | Impacto | Mitigación |
 |---|---|---|---|---|
 | Baja adopción de residentes | Negocio | Alta | Alto | Registro en < 2 min, códigos impresos, valor inmediato (pases) |
-| Resistencia de guardias | Negocio | Media | Alto | 2 botones, video de 2 min, modo práctica, dispositivo dedicado |
+| Resistencia de guardias | Negocio | Media | Alto | 3 botones, video de 2 min, modo práctica, dispositivo dedicado |
 | Dependencia del admin | Negocio | Alta | Medio | Asistente, presets, multi-admin |
 | Conectividad en garita | Técnico | Alta | Alto | Offline-first (M3) |
 | Residentes que no responden solicitudes → colas en garita | Negocio | Media | Alto | Escalamiento automático, "Dejar en garita", "Salgo a recoger", reingreso del día, educar a crear pases |
