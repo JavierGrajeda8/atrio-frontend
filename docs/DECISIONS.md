@@ -79,6 +79,7 @@ Estados: ⏳ pendiente (los agentes usan el default) · ✅ confirmada.
 | Q-38 | ¿Cómo se concilia la supresión de datos con el audit log inmutable? (#3) | El audit log **no guarda PII**: solo ids y valores enmascarados. Los eventos sin residencial van en una cadena global `platform`. **Validar con abogado** | SEC-54, SEC-55, SEC-60, SEC-61 | ✅ |
 | Q-39 | ¿Cualquiera puede crear residenciales y qué pasa al terminar el piloto? (#4) | Autoservicio con Turnstile, máximo 2 residenciales por usuario y presupuesto de mensajería bajo en `trial`. El paso `trial` → `suspended` es **manual**, por endpoint interno auditado (ROL-13), hasta que exista facturación | EST-01, LIF-06, ROL-13, Q-12, Q-14 | ✅ |
 | Q-40 | ¿Qué validación de DPI se implementa en el MVP? (#5) | Solo **13 dígitos y códigos de departamento/municipio**. El dígito verificador del CUI queda detrás de un flag apagado hasta confirmar el algoritmo con fuente oficial (RENAP) | WLK-04, H9 | ✅ |
+| Q-41 | ¿Cómo se firma la imagen del backend mientras el repo sea privado? (#22) | **No se firma todavía.** Las attestations de GitHub no están disponibles en repos privados sin Enterprise Cloud, y cosign *keyless* registraría el nombre del repo en un log público (Rekor). La imagen se publica en GHCR **escaneada con Trivy (sin CRITICAL ni HIGH con parche) y con SBOM SPDX** como artefacto del workflow. Se firma (attestation o cosign) cuando el repo sea público o haya Enterprise; hasta entonces el despliegue a staging/producción usa el digest verificado por el CI | SEC-82, SEC-83 | ✅ |
 
 ---
 
@@ -93,3 +94,4 @@ Estados: ⏳ pendiente (los agentes usan el default) · ✅ confirmada.
 | 2026-10-16 | Correcciones tras `/revisar-spec` en SPEC y AGENTS: garita de 3 botones (Q-33), autorización en vivo y salidas solo en MVP, vigencia del paquete offline configurable, `support-access` fuera de la ruta de tenant, ubicación de `tenancy` (puerto en `platform`, implementación en `modules`), operaciones sin tenant (§9.6.8) y `scope`/condición en `permissions.yaml`. Preguntas abiertas: issues #1…#5 | Dueño del producto + Copilot |
 
 | 2026-10-16 | Q-36…Q-40 confirmadas (issues #1…#5): código numérico offline con clave por paquete, contacto principal, audit log sin PII, alta de residenciales con límites y validación de DPI sin dígito verificador por ahora | Dueño del producto + Copilot |
+| 2026-10-23 | Q-41: la imagen del backend se publica sin firma (SBOM y Trivy sí) mientras el repo sea privado; la firma se difiere hasta repo público o Enterprise (#22) | Dueño del producto + Copilot |

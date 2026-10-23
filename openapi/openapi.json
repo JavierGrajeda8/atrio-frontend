@@ -1,0 +1,315 @@
+{
+  "components": {
+    "schemas": {
+      "ErrorBody": {
+        "properties": {
+          "code": {
+            "title": "Code",
+            "type": "string"
+          },
+          "details": {
+            "additionalProperties": {
+              "$ref": "#/components/schemas/JsonValue"
+            },
+            "title": "Details",
+            "type": "object"
+          },
+          "message": {
+            "title": "Message",
+            "type": "string"
+          },
+          "request_id": {
+            "title": "Request Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "message",
+          "details",
+          "request_id"
+        ],
+        "title": "ErrorBody",
+        "type": "object"
+      },
+      "ErrorResponse": {
+        "properties": {
+          "error": {
+            "$ref": "#/components/schemas/ErrorBody"
+          }
+        },
+        "required": [
+          "error"
+        ],
+        "title": "ErrorResponse",
+        "type": "object"
+      },
+      "HTTPValidationError": {
+        "properties": {
+          "detail": {
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            },
+            "title": "Detail",
+            "type": "array"
+          }
+        },
+        "title": "HTTPValidationError",
+        "type": "object"
+      },
+      "HealthResponse": {
+        "properties": {
+          "status": {
+            "enum": [
+              "ok",
+              "unavailable"
+            ],
+            "title": "Status",
+            "type": "string"
+          }
+        },
+        "required": [
+          "status"
+        ],
+        "title": "HealthResponse",
+        "type": "object"
+      },
+      "JsonValue": {},
+      "ResidentialResponse": {
+        "properties": {
+          "address_line": {
+            "title": "Address Line",
+            "type": "string"
+          },
+          "city": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "City"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "locale": {
+            "title": "Locale",
+            "type": "string"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "slug": {
+            "title": "Slug",
+            "type": "string"
+          },
+          "status": {
+            "title": "Status",
+            "type": "string"
+          },
+          "timezone": {
+            "title": "Timezone",
+            "type": "string"
+          },
+          "type": {
+            "title": "Type",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "slug",
+          "name",
+          "type",
+          "address_line",
+          "city",
+          "timezone",
+          "locale",
+          "status"
+        ],
+        "title": "ResidentialResponse",
+        "type": "object"
+      },
+      "ValidationError": {
+        "properties": {
+          "ctx": {
+            "title": "Context",
+            "type": "object"
+          },
+          "input": {
+            "title": "Input"
+          },
+          "loc": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "title": "Location",
+            "type": "array"
+          },
+          "msg": {
+            "title": "Message",
+            "type": "string"
+          },
+          "type": {
+            "title": "Error Type",
+            "type": "string"
+          }
+        },
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "title": "ValidationError",
+        "type": "object"
+      }
+    },
+    "securitySchemes": {
+      "HTTPBearer": {
+        "description": "Access token JWT",
+        "scheme": "bearer",
+        "type": "http"
+      }
+    }
+  },
+  "info": {
+    "title": "Atrio API",
+    "version": "0.1.0"
+  },
+  "openapi": "3.1.0",
+  "paths": {
+    "/api/v1/residentials/{residential_id}": {
+      "get": {
+        "operationId": "get_residential",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "residential_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Residential Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResidentialResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Sin membresía activa o sin permiso"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "El residencial no existe o no es tuyo"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Datos del residencial",
+        "tags": [
+          "residentials"
+        ]
+      }
+    },
+    "/healthz": {
+      "get": {
+        "operationId": "healthz",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HealthResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Liveness: el proceso responde",
+        "tags": [
+          "health"
+        ]
+      }
+    },
+    "/readyz": {
+      "get": {
+        "operationId": "readyz",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HealthResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HealthResponse"
+                }
+              }
+            },
+            "description": "Service Unavailable"
+          }
+        },
+        "summary": "Readiness: la API puede atender tráfico (la base de datos responde)",
+        "tags": [
+          "health"
+        ]
+      }
+    }
+  }
+}
