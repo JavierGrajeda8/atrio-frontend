@@ -730,22 +730,22 @@ frontend/
 1. La ruta trae `residential_id`. La dependencia `tenant_context` valida la membresía (SEC-20) y crea un `TenantContext(residential_id, user_id, memberships, permissions)`.
 2. Al iniciar cada transacción, un hook de SQLAlchemy ejecuta `SET LOCAL app.residential_id = …` y `SET LOCAL app.user_id = …` (compatible con pooling por transacción de RDS Proxy/PgBouncer).
 3. Los repositorios heredan de `TenantRepository`, que exige `TenantContext` y aplica filtro global por `residential_id`.
-4. RLS como red de seguridad final (falla cerrado: si la variable no está definida, no hay filas):
+4. RLS como red de seguridad final (falla cerrado: sin variable, o con una vacía, no hay filas; el `NULLIF` es necesario porque `SET LOCAL` deja `''` en la conexión reutilizada y `''::uuid` lanzaría un error):
 ```sql
 ALTER TABLE visits ENABLE ROW LEVEL SECURITY;
 ALTER TABLE visits FORCE ROW LEVEL SECURITY;
 CREATE POLICY tenant_isolation ON visits
-  USING      (residential_id = current_setting('app.residential_id', true)::uuid)
-  WITH CHECK (residential_id = current_setting('app.residential_id', true)::uuid);
+  USING      (residential_id = NULLIF(current_setting('app.residential_id', true), '')::uuid)
+  WITH CHECK (residential_id = NULLIF(current_setting('app.residential_id', true), '')::uuid);
 
 -- memberships: además permite al usuario ver sus propias membresías en todos los residenciales
 CREATE POLICY own_memberships ON memberships FOR SELECT
-  USING (user_id = current_setting('app.user_id', true)::uuid);
+  USING (user_id = NULLIF(current_setting('app.user_id', true), '')::uuid);
 ```
 5. Tablas globales (sin RLS de tenant): `users`, `sessions`, `otp_challenges`, `user_credentials`, `push_subscriptions`, `feature_flags` globales. Se acceden solo vía el módulo `identity`/`platform`.
 6. Workers: cada evento lleva `residential_id`; el handler abre su transacción con ese contexto. Las tareas verdaderamente globales (purga de retención) usan un rol de BD dedicado `atrio_maintenance` con permisos mínimos y auditoría.
 7. FKs compuestas, por ejemplo: `FOREIGN KEY (residential_id, unit_id) REFERENCES units (residential_id, id)`.
-8. **Operaciones sin tenant** (lista cerrada, cada una con prueba): crear residencial (EST-01), listar mis membresías, canjear una invitación, enrolar un dispositivo, resolver el token del pase, procesar webhooks y registrar intentos cross-tenant (SEC-67). Se implementan con funciones `SECURITY DEFINER` mínimas y un rol dedicado; nunca con `BYPASSRLS`. En `residentials` la política RLS es por `id`. La decisión se fija en `docs/adr/0002-tenancy.md` (BE-05) antes de escribir el código.
+8. **Operaciones sin tenant** (lista cerrada, cada una con prueba): crear residencial (EST-01), listar mis membresías, canjear una invitación, enrolar un dispositivo, resolver el token del pase, procesar webhooks y registrar intentos cross-tenant (SEC-67). Se implementan con funciones `SECURITY DEFINER` mínimas y un rol dedicado; nunca con `BYPASSRLS`. En `residentials` la política RLS es por `id`. La decisión y el patrón de cada función (rol `atrio_definer`, esquema `atrio_lookup`) están en `docs/adr/0002-tenancy.md`.
 
 ### 9.7 Eventos, outbox y trabajos
 - **ARC-10** Todo cambio de estado relevante escribe, **en la misma transacción**, la fila de negocio + `audit_log` + `outbox_events`.
