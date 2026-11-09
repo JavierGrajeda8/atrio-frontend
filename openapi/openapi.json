@@ -136,6 +136,81 @@
         "title": "ResidentialResponse",
         "type": "object"
       },
+      "ResidentialUpdate": {
+        "additionalProperties": false,
+        "description": "PATCH parcial (EST-01 parcial): solo lo enviado cambia. `slug`, `type` y `status` no.",
+        "properties": {
+          "address_line": {
+            "anyOf": [
+              {
+                "maxLength": 200,
+                "minLength": 1,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Address Line"
+          },
+          "city": {
+            "anyOf": [
+              {
+                "maxLength": 80,
+                "minLength": 1,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "`null` borra la ciudad",
+            "title": "City"
+          },
+          "locale": {
+            "anyOf": [
+              {
+                "enum": [
+                  "es-GT",
+                  "en-US"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Locale"
+          },
+          "name": {
+            "anyOf": [
+              {
+                "maxLength": 120,
+                "minLength": 1,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Name"
+          },
+          "timezone": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Zona horaria IANA, p. ej. America/Guatemala",
+            "title": "Timezone"
+          }
+        },
+        "title": "ResidentialUpdate",
+        "type": "object"
+      },
       "ValidationError": {
         "properties": {
           "ctx": {
@@ -215,7 +290,15 @@
                 }
               }
             },
-            "description": "Successful Response"
+            "description": "Successful Response",
+            "headers": {
+              "ETag": {
+                "description": "Versión del residencial: envíala en `If-Match` al modificarlo (API-07)",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
           },
           "403": {
             "content": {
@@ -254,6 +337,127 @@
           }
         ],
         "summary": "Datos del residencial",
+        "tags": [
+          "residentials"
+        ]
+      },
+      "patch": {
+        "description": "Actualización parcial con concurrencia optimista (API-07): envía en `If-Match` el `ETag` del último GET. Un PATCH sin cambios reales responde 200 sin auditar.",
+        "operationId": "update_residential",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "residential_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Residential Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "if-match",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "If-Match"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ResidentialUpdate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResidentialResponse"
+                }
+              }
+            },
+            "description": "Successful Response",
+            "headers": {
+              "ETag": {
+                "description": "Versión del residencial: envíala en `If-Match` al modificarlo (API-07)",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Sin membresía activa o sin permiso"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "El residencial no existe o no es tuyo"
+          },
+          "412": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "`If-Match` no coincide: el dato cambió"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Datos no válidos (`VALIDATION_ERROR`)"
+          },
+          "428": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Falta la cabecera `If-Match`"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Actualizar los datos del residencial",
         "tags": [
           "residentials"
         ]

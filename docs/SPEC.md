@@ -1001,7 +1001,7 @@ Prefijo `R` = `/api/v1/residentials/{rid}`.
 | `GET /api/v1/me/export` · `POST /api/v1/me/deletion-request` | autenticado | SEC-55 |
 | `POST /api/v1/invitations/redeem` | autenticado | Crea membresía pendiente |
 | `POST /api/v1/residentials` | autenticado | Creador = admin |
-| `GET/PATCH R` | `residential.read` / `residential.manage` | |
+| `GET/PATCH R` | `residential.read` / `residential.manage` | `ETag` en el GET; el PATCH exige `If-Match` (428/412, API-07); patrón en `docs/adr/0001-patron-endpoint.md` |
 | `GET/PATCH R/settings` | `residential.manage` | Algunas claves con step-up |
 | `CRUD R/sectors`, `R/units`, `R/gates` | `structure.manage` | |
 | `POST R/units:generate-range` | `structure.manage` | EST-05 |
@@ -1080,6 +1080,7 @@ Los payloads llevan ids y datos mínimos, **nunca** secretos ni PII innecesaria.
 | Evento | Payload clave | Consumidores |
 |---|---|---|
 | `residential.created` | `type` | insights, automation (presets) |
+| `residential.updated` | `changed_fields` | audit, insights |
 | `import.applied` | `kind`, `created`, `updated` | insights |
 | `invitations.generated` | `count` | insights |
 | `membership.requested` | `membership_id`, `unit_id`, `sub_role` | comms (admin) |
