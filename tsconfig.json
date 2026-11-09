@@ -1,0 +1,5 @@
+{
+  "extends": "@atrio/config/tsconfig.base.json",
+  "include": ["vitest.config.ts", "tests"],
+  "compilerOptions": { "types": ["node"] }
+}

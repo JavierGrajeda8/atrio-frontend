@@ -1,0 +1,4 @@
+{
+  "extends": "@atrio/config/tsconfig.base.json",
+  "include": ["src"]
+}
