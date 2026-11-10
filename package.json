@@ -18,6 +18,7 @@
   "devDependencies": {
     "@atrio/config": "workspace:*",
     "@size-limit/file": "^14.3.0",
+    "@tailwindcss/node": "^4",
     "@types/node": "^22",
     "eslint": "^9.0.0",
     "prettier": "^3.0.0",
