@@ -1,5 +1,5 @@
 .DEFAULT_GOAL := help
-.PHONY: help setup dev test lint typecheck build format size security api-client e2e
+.PHONY: help setup dev test lint typecheck build format size security security-osv security-gitleaks api-client e2e
 
 PNPM ?= pnpm
 
@@ -36,8 +36,15 @@ build:
 size:
 	$(call pending,size,#7,FR-02b)
 
-security:
-	$(call pending,security,#6,FR-02a)
+security: security-osv security-gitleaks
+
+security-osv:
+	@command -v osv-scanner >/dev/null || { echo "Falta osv-scanner: brew install osv-scanner" >&2; exit 1; }
+	osv-scanner scan source --lockfile pnpm-lock.yaml
+
+security-gitleaks:
+	@command -v gitleaks >/dev/null || { echo "Falta gitleaks: brew install gitleaks" >&2; exit 1; }
+	gitleaks git --no-banner --redact
 
 api-client:
 	$(call pending,api-client,#12,FR-05a)
