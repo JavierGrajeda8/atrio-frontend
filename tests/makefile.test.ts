@@ -2,7 +2,6 @@ import { spawnSync } from "node:child_process";
 import { describe, expect, it } from "vitest";
 
 const pending = [
-  { target: "size", issue: "#7" },
   { target: "api-client", issue: "#12" },
   { target: "e2e", issue: "#23" },
 ];
