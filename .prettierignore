@@ -6,3 +6,4 @@ docs
 openapi
 .github
 *.md
+packages/ui/src/theme.css

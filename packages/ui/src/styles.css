@@ -1,0 +1,17 @@
+/* Punto de entrada de estilos del design system: Tailwind v4 con los tokens de la marca y las
+   fuentes propias. Cada app lo importa una vez: `import "@atrio/ui/styles.css"`. */
+@layer theme, base, components, utilities;
+
+@import "tailwindcss/theme.css" layer(theme);
+@import "tailwindcss/preflight.css" layer(base);
+@import "tailwindcss/utilities.css" layer(utilities);
+
+@import "./theme.css";
+@import "./fonts.css";
+
+@layer base {
+  body {
+    background-color: var(--color-bg);
+    color: var(--color-text);
+  }
+}
