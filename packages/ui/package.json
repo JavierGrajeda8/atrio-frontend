@@ -10,12 +10,21 @@
     "tokens": "node scripts/generate-theme.mjs"
   },
   "devDependencies": {
-    "@atrio/config": "workspace:*"
+    "@atrio/config": "workspace:*",
+    "@testing-library/dom": "^10.4.2",
+    "@testing-library/react": "^16.3.3",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "vitest-axe": "^0.1.0"
   },
   "dependencies": {
     "@fontsource/atkinson-hyperlegible": "^5.3.0",
     "@fontsource/bricolage-grotesque": "^5.3.0",
     "@fontsource/jetbrains-mono": "^5.3.0",
+    "@radix-ui/react-label": "^2.1.17",
+    "@radix-ui/react-slot": "^1.5.0",
     "tailwindcss": "^4"
   },
   "exports": {

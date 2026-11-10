@@ -21,6 +21,7 @@
     "@tailwindcss/node": "^4",
     "@types/node": "^22",
     "eslint": "^9.0.0",
+    "jsdom": "^31.0.0",
     "prettier": "^3.0.0",
     "size-limit": "^14.3.0",
     "typescript": "^5.0.0",
