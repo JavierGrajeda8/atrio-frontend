@@ -33,8 +33,8 @@ format:
 build:
 	$(PNPM) -r --filter "./apps/*" build
 
-size:
-	$(call pending,size,#7,FR-02b)
+size: build
+	$(PNPM) size
 
 security: security-osv security-gitleaks
 

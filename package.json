@@ -12,13 +12,17 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "typecheck": "tsc --noEmit && pnpm -r --if-present typecheck",
+    "size": "size-limit",
     "test": "vitest run"
   },
   "devDependencies": {
     "@atrio/config": "workspace:*",
+    "@size-limit/file": "^14.3.0",
+    "@tailwindcss/node": "^4",
     "@types/node": "^22",
     "eslint": "^9.0.0",
     "prettier": "^3.0.0",
+    "size-limit": "^14.3.0",
     "typescript": "^5.0.0",
     "vitest": "^4.1.12"
   },
