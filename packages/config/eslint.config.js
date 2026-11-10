@@ -14,4 +14,11 @@ export default tseslint.config(
       ],
     },
   },
+  {
+    files: ["**/*.tsx"],
+    rules: {
+      // i18n/no-literal-string rule will be enabled when react components are added
+      // This rule prevents literal strings in JSX - use <FormattedMessage> or useIntl()
+    },
+  },
 );
