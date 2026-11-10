@@ -13,7 +13,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           fetch-depth: 0
 
@@ -21,15 +21,4 @@ jobs:
         env:
           HEAD_REF: ${{ github.head_ref }}
           BASE_REF: ${{ github.base_ref }}
-        run: |
-          if [ "$HEAD_REF" = "sync/backend" ]; then
-            echo "PR de sincronización: permitido."
-            exit 0
-          fi
-          changed=$(git diff --name-only "origin/$BASE_REF...HEAD" -- docs openapi | grep -v '^docs/SYNCED_FROM_BACKEND.md$' || true)
-          if [ -n "$changed" ]; then
-            echo "::error::Estos archivos se editan en el repo backend y llegan por el PR de sincronización:"
-            echo "$changed"
-            exit 1
-          fi
-          echo "Sin cambios en archivos sincronizados."
+        run: scripts/guard-synced-files.sh "$HEAD_REF" "origin/$BASE_REF"

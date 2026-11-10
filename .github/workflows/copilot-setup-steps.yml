@@ -2,7 +2,6 @@ name: "Copilot Setup Steps"
 
 # Prepara el entorno del agente de Copilot en la nube antes de que empiece a trabajar.
 # Se valida sola cuando cambia este archivo y se puede correr a mano desde Actions.
-# FR-02 la actualiza con los comandos reales del proyecto.
 on:
   workflow_dispatch:
   push:
@@ -22,28 +21,42 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
-      - name: Node 22
-        uses: actions/setup-node@v4
-        with:
-          node-version: "22"
-
+      # La versión de pnpm sale de `packageManager` en package.json.
       - name: pnpm
-        run: npm install -g pnpm@10
+        uses: pnpm/action-setup@73e46992e05b19abd31f2f3c20e0e7370d762115 # v6.1.1
 
-      - name: Dependencias (cuando el proyecto ya existe)
+      - name: Node (versión de .nvmrc)
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+
+      - name: Dependencias del workspace
+        run: pnpm install --frozen-lockfile
+
+      # Mismas versiones y SHA-256 que `ci.yml`, para que el agente pueda correr `make security`.
+      - name: osv-scanner y gitleaks
+        env:
+          OSV_SCANNER_VERSION: "2.7.1"
+          OSV_SCANNER_SHA256: "fb7dab19a8bd9bbe5c3189f09d4b7ee1820c9553a23bac202648a56efd2f6ee8"
+          GITLEAKS_VERSION: "8.30.1"
+          GITLEAKS_SHA256: "551f6fc83ea457d62a0d98237cbad105af8d557003051f41f3e7ca7b3f2470eb"
         run: |
-          if [ -f pnpm-lock.yaml ]; then
-            pnpm install --frozen-lockfile
-          elif [ -f package.json ]; then
-            pnpm install
-          else
-            echo "package.json todavía no existe: lo crea el issue FR-01."
-          fi
+          curl -fsSL -o osv-scanner \
+            "https://github.com/google/osv-scanner/releases/download/v${OSV_SCANNER_VERSION}/osv-scanner_linux_amd64"
+          echo "${OSV_SCANNER_SHA256}  osv-scanner" | sha256sum --check --strict
+          sudo install -m 0755 osv-scanner /usr/local/bin/osv-scanner
+          curl -fsSL -o gitleaks.tar.gz \
+            "https://github.com/gitleaks/gitleaks/releases/download/v${GITLEAKS_VERSION}/gitleaks_${GITLEAKS_VERSION}_linux_x64.tar.gz"
+          echo "${GITLEAKS_SHA256}  gitleaks.tar.gz" | sha256sum --check --strict
+          tar -xzf gitleaks.tar.gz gitleaks
+          sudo install -m 0755 gitleaks /usr/local/bin/gitleaks
+          rm -f osv-scanner gitleaks gitleaks.tar.gz
 
       - name: Navegador para Playwright (cuando existe e2e/)
         run: |
-          if [ -d e2e ] && [ -f package.json ]; then
-            pnpm exec playwright install --with-deps chromium || echo "Playwright aún no está instalado."
+          if [ -d e2e ]; then
+            pnpm exec playwright install --with-deps chromium
           fi
