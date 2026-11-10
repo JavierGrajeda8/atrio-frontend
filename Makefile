@@ -15,8 +15,7 @@ setup:
 	$(PNPM) install
 
 dev:
-	@echo "No hay apps todavía: 'make dev' levantará web, guard y pass cuando FR-01b (#5) las cree." >&2
-	@exit 1
+	$(PNPM) -r --parallel --filter "./apps/*" dev
 
 test:
 	$(PNPM) test
@@ -32,8 +31,7 @@ format:
 	$(PNPM) format
 
 build:
-	@echo "No hay apps que construir todavía: 'make build' las construirá cuando FR-01b (#5) las cree." >&2
-	@exit 1
+	$(PNPM) -r --filter "./apps/*" build
 
 size:
 	$(call pending,size,#7,FR-02b)
