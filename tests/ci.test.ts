@@ -14,7 +14,11 @@ describe("ci.yml", () => {
     const jobs = [...ci.slice(ci.indexOf("\njobs:")).matchAll(/^ {2}([a-z-]+):\s*$/gm)].map(
       (match) => match[1],
     );
-    expect(jobs).toEqual(["lint", "typecheck", "test", "build", "security", "secrets"]);
+    expect(jobs).toEqual(["lint", "typecheck", "test", "build", "size", "security", "secrets"]);
+  });
+
+  it("corre make size en el job size", () => {
+    expect(ci).toMatch(/- run: make size\b/);
   });
 
   it("corre make security en el job security", () => {
