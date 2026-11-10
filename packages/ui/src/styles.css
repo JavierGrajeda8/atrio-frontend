@@ -9,6 +9,9 @@
 @import "./theme.css";
 @import "./fonts.css";
 
+/* Tailwind solo escanea el proyecto que lo compila: los componentes viven en este paquete. */
+@source "./components";
+
 @layer base {
   body {
     background-color: var(--color-bg);
