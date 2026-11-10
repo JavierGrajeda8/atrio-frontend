@@ -8,7 +8,18 @@
   "scripts": {
     "typecheck": "tsc --noEmit"
   },
+  "dependencies": {
+    "intl-messageformat": "^10.5.14"
+  },
   "devDependencies": {
-    "@atrio/config": "workspace:*"
+    "@atrio/config": "workspace:*",
+    "@types/eslint": "^9.0.0",
+    "@types/intl-messageformat": "^3.0.0",
+    "react": "^19.0.0",
+    "react-intl": "^12.0.0"
+  },
+  "peerDependencies": {
+    "react": "^19.0.0",
+    "react-intl": "^12.0.0"
   }
 }
