@@ -1,5 +1,6 @@
 import { readFileSync } from "node:fs";
 import react from "@vitejs/plugin-react";
+import tailwindcss from "@tailwindcss/vite";
 import { defineConfig } from "vite";
 import { VitePWA } from "vite-plugin-pwa";
 
@@ -14,6 +15,7 @@ function token(name: string): string {
 export default defineConfig({
   plugins: [
     react(),
+    tailwindcss(),
     VitePWA({
       // `prompt`: una versión nueva espera y nunca recarga la app en pleno turno (OFF-09).
       // La política completa de actualización llega con FR-06d.

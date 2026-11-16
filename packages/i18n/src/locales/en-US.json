@@ -128,5 +128,15 @@
   "ui.gate.denied.details": "The pass has expired",
   "ui.gate.offline": "No connection",
   "ui.gate.offline.details": "Validating with the offline package",
-  "ui.gate.action": "Scan another"
+  "ui.gate.action": "Scan another",
+  "guard.title": "Atrio Gate",
+  "guard.connection.online": "Online",
+  "guard.connection.offlineJustNow": "Offline — data just synced",
+  "guard.connection.offlineMinutes": "Offline — data from {minutes}\u00a0min ago",
+  "guard.connection.offlineHours": "Offline — data from {hours}\u00a0h ago",
+  "guard.connection.expired": "Offline data expired — use the manual protocol",
+  "guard.home.scan": "Scan QR",
+  "guard.home.code": "Enter code",
+  "guard.home.walkIn": "No pass",
+  "guard.route.back": "Back to start"
 }
