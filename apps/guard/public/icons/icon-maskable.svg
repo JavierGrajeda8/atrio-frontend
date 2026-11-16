@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="Atrio">
+  <!-- Variante maskable del ícono provisional: el dibujo ocupa el 80 % central (zona segura). -->
+  <rect width="512" height="512" fill="#33419C"/>
+  <g transform="translate(256 256) scale(0.8) translate(-256 -268)">
+    <path d="M136 408V248a120 120 0 0 1 240 0v160z" fill="#FAF7F2"/>
+    <path d="M200 408V262a56 56 0 0 1 112 0v146z" fill="#F2B33D"/>
+  </g>
+</svg>
