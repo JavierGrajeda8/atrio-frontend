@@ -18,8 +18,9 @@ export default defineConfig({
     tailwindcss(),
     VitePWA({
       // `prompt`: una versión nueva espera y nunca recarga la app en pleno turno (OFF-09).
-      // La política completa de actualización llega con FR-06d.
+      // El registro y la política de aplicación viven en src/update (sin `registerSW.js`).
       registerType: "prompt",
+      injectRegister: false,
       manifest: {
         id: "/",
         name: "Atrio Garita",

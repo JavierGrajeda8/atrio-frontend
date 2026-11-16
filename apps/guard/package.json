@@ -13,7 +13,8 @@
     "@atrio/ui": "workspace:^",
     "dexie": "^4.4.7",
     "react": "^19.0.0",
-    "react-dom": "^19.0.0"
+    "react-dom": "^19.0.0",
+    "workbox-window": "^7.4.1"
   },
   "devDependencies": {
     "@atrio/config": "workspace:*",
