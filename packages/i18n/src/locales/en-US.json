@@ -120,5 +120,13 @@
   "ui.badge.primary": "Invited",
   "ui.badge.success": "Approved",
   "ui.badge.danger": "Rejected",
-  "ui.badge.warning": "Expiring soon"
+  "ui.badge.warning": "Expiring soon",
+  "ui.gate.title": "Gate screen",
+  "ui.gate.granted": "Go ahead",
+  "ui.gate.granted.details": "Visitor authorized",
+  "ui.gate.denied": "Do not enter",
+  "ui.gate.denied.details": "The pass has expired",
+  "ui.gate.offline": "No connection",
+  "ui.gate.offline.details": "Validating with the offline package",
+  "ui.gate.action": "Scan another"
 }
