@@ -69,6 +69,9 @@ const nonText: Array<[string, string, string]> = [
   ["color-danger", "color-surface", "borde de Input inválido"],
   ["color-primary", "color-bg", "anillo de foco (outline-primary) sobre la página"],
   ["color-primary", "color-surface", "anillo de foco (outline-primary) en Card"],
+  ["color-success", "color-surface", "indicador de conexión: en línea (borde e ícono)"],
+  ["color-warning-text", "color-surface", "indicador de conexión: sin conexión (borde e ícono)"],
+  ["color-danger", "color-surface", "indicador de conexión: vencido (borde e ícono)"],
 ];
 
 // Pantalla de garita: AAA (7:1), según BRAND §4.3 y las reglas del design system.

@@ -128,5 +128,15 @@
   "ui.gate.denied.details": "El pase venció",
   "ui.gate.offline": "Sin conexión",
   "ui.gate.offline.details": "Validando con el paquete sin conexión",
-  "ui.gate.action": "Escanear otro"
+  "ui.gate.action": "Escanear otro",
+  "guard.title": "Atrio Garita",
+  "guard.connection.online": "En línea",
+  "guard.connection.offlineJustNow": "Sin conexión — datos recién sincronizados",
+  "guard.connection.offlineMinutes": "Sin conexión — datos de hace {minutes}\u00a0min",
+  "guard.connection.offlineHours": "Sin conexión — datos de hace {hours}\u00a0h",
+  "guard.connection.expired": "Datos offline vencidos — usa el protocolo manual",
+  "guard.home.scan": "Escanear QR",
+  "guard.home.code": "Ingresar código",
+  "guard.home.walkIn": "Sin pase",
+  "guard.route.back": "Volver al inicio"
 }
