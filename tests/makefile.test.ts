@@ -1,10 +1,7 @@
 import { spawnSync } from "node:child_process";
 import { describe, expect, it } from "vitest";
 
-const pending = [
-  { target: "api-client", issue: "#12" },
-  { target: "e2e", issue: "#23" },
-];
+const pending = [{ target: "e2e", issue: "#23" }];
 
 describe("targets pendientes del Makefile", () => {
   it.each(pending)("make $target falla indicando el issue $issue", ({ target, issue }) => {
