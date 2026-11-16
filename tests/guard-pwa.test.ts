@@ -62,12 +62,19 @@ describe("guard es una PWA instalable (OFF-01)", () => {
     }
   });
 
-  it("el HTML enlaza el manifiesto, registra el service worker y trae los íconos", () => {
+  it("el HTML enlaza el manifiesto y trae los íconos; la app registra el service worker", () => {
     const html = read("index.html");
     expect(html).toContain('<link rel="manifest" href="/manifest.webmanifest">');
-    expect(html).toMatch(/<script[^>]+src="\/registerSW\.js"/);
     expect(html).toContain('rel="apple-touch-icon"');
-    expect(read("registerSW.js")).toContain("serviceWorker.register('/sw.js'");
+    // El registro lo hace la app (src/update): no hay `registerSW.js` aparte que registre por su cuenta.
+    expect(html).not.toMatch(/registerSW\.js/);
+    expect(existsSync(join(dist, "registerSW.js"))).toBe(false);
+    const bundle = readdirSync(join(dist, "assets"))
+      .filter((name) => name.endsWith(".js"))
+      .map((name) => readFileSync(join(dist, "assets", name), "utf-8"))
+      .join("\n");
+    expect(bundle).toContain("/sw.js");
+    expect(bundle).toMatch(/serviceWorker/);
   });
 });
 
