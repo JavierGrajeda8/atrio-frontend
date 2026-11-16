@@ -2,7 +2,7 @@
 import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { axe } from "vitest-axe";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { Badge, Button, Card, CardTitle, Field, Input } from "../index";
+import { Badge, Button, Card, CardTitle, Field, GateStatus, Input } from "../index";
 
 afterEach(() => {
   cleanup();
@@ -121,10 +121,79 @@ describe("Badge", () => {
   });
 });
 
+describe("GateStatus", () => {
+  const states = [
+    { status: "granted", label: "Adelante", details: "Visita autorizada" },
+    { status: "denied", label: "No pasa", details: "Pase vencido" },
+    { status: "offline", label: "Sin conexión", details: "Validando sin red" },
+  ] as const;
+
+  it.each(states)("$status muestra un ícono y una palabra, nunca solo color", (state) => {
+    const { container } = render(<GateStatus {...state} />);
+    const screenRegion = screen.getByRole("status");
+    expect(screenRegion.getAttribute("data-status")).toBe(state.status);
+    expect(screenRegion.textContent).toContain(state.label);
+    expect(screen.getByText(state.label).className).toContain("uppercase");
+    const icon = container.querySelector("svg");
+    expect(icon?.getAttribute("aria-hidden")).toBe("true");
+    expect(icon?.getAttribute("width")).toBe("96");
+    expect(icon?.querySelector("path, circle")).not.toBeNull();
+  });
+
+  it("cada estado usa un ícono distinto y su par de tokens gate-*", () => {
+    const markup = states.map((state) => {
+      const { container, unmount } = render(<GateStatus {...state} />);
+      const result = {
+        icon: container.querySelector("svg")?.innerHTML,
+        classes: screen.getByRole("status").className,
+      };
+      unmount();
+      return result;
+    });
+    expect(new Set(markup.map((item) => item.icon)).size).toBe(3);
+    expect(markup[0]?.classes).toContain("bg-gate-granted-bg text-gate-granted-fg");
+    expect(markup[1]?.classes).toContain("bg-gate-denied-bg text-gate-denied-fg");
+    expect(markup[2]?.classes).toContain("bg-gate-offline-bg text-gate-offline-fg");
+  });
+
+  it("recibe los textos por props: el detalle y las acciones son opcionales", () => {
+    render(<GateStatus status="granted" label="Adelante" />);
+    expect(screen.getByRole("status").textContent).toBe("Adelante");
+  });
+
+  it("el texto hereda 18 px (text-md en la raíz) y las acciones miden 56 px (touch-gate)", () => {
+    render(
+      <GateStatus
+        status="denied"
+        label="No pasa"
+        details="Pase vencido"
+        actions={<Button size="lg">Volver</Button>}
+      />,
+    );
+    expect(screen.getByRole("status").className).toContain("text-md");
+    expect(screen.getByRole("button", { name: "Volver" }).className).toContain("min-h-touch-gate");
+  });
+
+  it("no hace peticiones de red: se muestra igual sin conexión", () => {
+    const fetchSpy = vi.spyOn(globalThis, "fetch");
+    render(<GateStatus status="offline" label="Sin conexión" details="Validando sin red" />);
+    expect(fetchSpy).not.toHaveBeenCalled();
+    fetchSpy.mockRestore();
+  });
+});
+
 function Components() {
   return (
     <main>
       <h1>Componentes</h1>
+      <GateStatus status="granted" label="Adelante" details="Visita autorizada" />
+      <GateStatus status="denied" label="No pasa" details="Pase vencido" />
+      <GateStatus
+        status="offline"
+        label="Sin conexión"
+        details="Validando sin red"
+        actions={<Button size="lg">Volver</Button>}
+      />
       <Card>
         <CardTitle as="h2">Formulario</CardTitle>
         <Field label="Nombre" description="Como en su documento.">
@@ -156,7 +225,7 @@ describe("accesibilidad (axe)", () => {
   // En jsdom la regla `color-contrast` de axe no puede evaluar estilos (queda "incompleta" y
   // muestra avisos de canvas); el contraste se mide sobre los tokens en tests/ui-contrast.test.ts.
   for (const theme of ["light", "dark"] as const) {
-    it(`los 5 componentes no reportan violaciones en tema ${theme}`, async () => {
+    it(`los componentes y las 3 pantallas de garita no reportan violaciones en tema ${theme}`, async () => {
       document.documentElement.setAttribute("data-theme", theme);
       const { container } = render(<Components />);
       const results = await axe(container);

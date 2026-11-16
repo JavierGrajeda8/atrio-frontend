@@ -71,6 +71,13 @@ const nonText: Array<[string, string, string]> = [
   ["color-primary", "color-surface", "anillo de foco (outline-primary) en Card"],
 ];
 
+// Pantalla de garita: AAA (7:1), según BRAND §4.3 y las reglas del design system.
+const gate: Array<[string, string, string]> = [
+  ["color-gate-granted-fg", "color-gate-granted-bg", "ADELANTE"],
+  ["color-gate-denied-fg", "color-gate-denied-bg", "NO PASA"],
+  ["color-gate-offline-fg", "color-gate-offline-bg", "SIN CONEXIÓN"],
+];
+
 describe("contraste de los tokens que usan los componentes (WCAG 2.2 AA)", () => {
   for (const [themeName, tokens] of [
     ["claro", light],
@@ -87,6 +94,29 @@ describe("contraste de los tokens que usan los componentes (WCAG 2.2 AA)", () =>
           expect(ratio(resolve(tokens, fg), resolve(tokens, bg))).toBeGreaterThanOrEqual(3);
         });
       }
+      for (const [fg, bg, use] of gate) {
+        it(`garita ${use}: ${fg} sobre ${bg} ≥ 7:1 (AAA)`, () => {
+          expect(ratio(resolve(tokens, fg), resolve(tokens, bg))).toBeGreaterThanOrEqual(7);
+        });
+      }
     });
   }
+});
+
+describe("tamaños de la pantalla de garita (NFR-05)", () => {
+  const px = (name: string): number => {
+    const value = light[`--${name}`] ?? "";
+    const match = /^([\d.]+)(rem|px)$/.exec(value);
+    expect(match, `${name} = ${value}`).not.toBeNull();
+    return (match?.[2] === "rem" ? 16 : 1) * Number(match?.[1]);
+  };
+
+  it("el texto de apoyo (text-md) es ≥ 18 px y la palabra del estado (text-gate) es 56 px", () => {
+    expect(px("text-md")).toBeGreaterThanOrEqual(18);
+    expect(px("text-gate")).toBe(56);
+  });
+
+  it("el objetivo táctil de garita (touch-gate) es ≥ 56 px", () => {
+    expect(px("touch-gate")).toBeGreaterThanOrEqual(56);
+  });
 });

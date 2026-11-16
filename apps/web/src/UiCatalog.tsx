@@ -1,5 +1,5 @@
-import { Badge, Button, Card, CardTitle, Field, Input } from "@atrio/ui";
-import type { BadgeTone, ButtonVariant } from "@atrio/ui";
+import { Badge, Button, Card, CardTitle, Field, GateStatus, Input } from "@atrio/ui";
+import type { BadgeTone, ButtonVariant, GateStatusKind } from "@atrio/ui";
 import { FormattedMessage, useIntl } from "@atrio/i18n";
 import type { MessageId } from "@atrio/i18n";
 import { useState } from "react";
@@ -17,6 +17,16 @@ const buttonVariants: Array<{ variant: ButtonVariant; id: MessageId }> = [
   { variant: "secondary", id: "ui.button.secondary" },
   { variant: "ghost", id: "ui.button.ghost" },
   { variant: "danger", id: "ui.button.danger" },
+];
+
+const gateStates: Array<{
+  status: GateStatusKind;
+  label: MessageId;
+  details: MessageId;
+}> = [
+  { status: "granted", label: "ui.gate.granted", details: "ui.gate.granted.details" },
+  { status: "denied", label: "ui.gate.denied", details: "ui.gate.denied.details" },
+  { status: "offline", label: "ui.gate.offline", details: "ui.gate.offline.details" },
 ];
 
 const badgeTones: Array<{ tone: BadgeTone; id: MessageId }> = [
@@ -143,6 +153,30 @@ export function UiCatalog() {
             <Badge key={tone} tone={tone}>
               <FormattedMessage id={id} />
             </Badge>
+          ))}
+        </div>
+      </Card>
+
+      <Card>
+        <CardTitle as="h2">
+          <FormattedMessage id="ui.gate.title" />
+        </CardTitle>
+        <div className="flex flex-col gap-3">
+          {gateStates.map(({ status, label, details }) => (
+            <GateStatus
+              key={status}
+              status={status}
+              className="min-h-72 rounded-lg"
+              label={intl.formatMessage({ id: label })}
+              details={intl.formatMessage({ id: details })}
+              actions={
+                status === "offline" ? (
+                  <Button size="lg" variant="secondary">
+                    <FormattedMessage id="ui.gate.action" />
+                  </Button>
+                ) : undefined
+              }
+            />
           ))}
         </div>
       </Card>

@@ -23,9 +23,12 @@ afterEach(() => {
 describe("página /_ui", () => {
   it("muestra Button, Input, Field, Card y Badge", () => {
     render(<UiCatalog />);
-    for (const name of ["Botón", "Campo de texto", "Tarjeta", "Insignia"]) {
+    for (const name of ["Botón", "Campo de texto", "Tarjeta", "Insignia", "Pantalla de garita"]) {
       expect(screen.getByRole("heading", { level: 2, name })).toBeTruthy();
     }
+    expect(
+      screen.getAllByRole("status").map((status) => status.getAttribute("data-status")),
+    ).toEqual(["granted", "denied", "offline"]);
     expect(screen.getAllByRole("button").length).toBeGreaterThan(4);
     expect(screen.getAllByRole("textbox").length).toBeGreaterThan(1);
     expect(screen.getByText("Aprobado")).toBeTruthy();

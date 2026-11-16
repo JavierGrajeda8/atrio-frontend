@@ -120,5 +120,13 @@
   "ui.badge.primary": "Invitado",
   "ui.badge.success": "Aprobado",
   "ui.badge.danger": "Rechazado",
-  "ui.badge.warning": "Por vencer"
+  "ui.badge.warning": "Por vencer",
+  "ui.gate.title": "Pantalla de garita",
+  "ui.gate.granted": "Adelante",
+  "ui.gate.granted.details": "Visita autorizada",
+  "ui.gate.denied": "No pasa",
+  "ui.gate.denied.details": "El pase venció",
+  "ui.gate.offline": "Sin conexión",
+  "ui.gate.offline.details": "Validando con el paquete sin conexión",
+  "ui.gate.action": "Escanear otro"
 }
