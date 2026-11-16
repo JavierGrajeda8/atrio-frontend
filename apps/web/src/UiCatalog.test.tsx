@@ -1,9 +1,18 @@
 // @vitest-environment jsdom
-import { cleanup, fireEvent, render, screen } from "@testing-library/react";
+import { cleanup, fireEvent, render as baseRender, screen } from "@testing-library/react";
+import type { ReactElement } from "react";
 import { axe } from "vitest-axe";
 import { afterEach, describe, expect, it } from "vitest";
+import { I18nProvider } from "@atrio/i18n";
+import type { Locale } from "@atrio/i18n";
 import { App } from "./App";
 import { UiCatalog } from "./UiCatalog";
+
+function render(ui: ReactElement, locale?: Locale) {
+  return baseRender(ui, {
+    wrapper: ({ children }) => <I18nProvider locale={locale}>{children}</I18nProvider>,
+  });
+}
 
 afterEach(() => {
   cleanup();
@@ -14,12 +23,21 @@ afterEach(() => {
 describe("página /_ui", () => {
   it("muestra Button, Input, Field, Card y Badge", () => {
     render(<UiCatalog />);
-    for (const name of ["Button", "Input y Field", "Card", "Badge"]) {
+    for (const name of ["Botón", "Campo de texto", "Tarjeta", "Insignia"]) {
       expect(screen.getByRole("heading", { level: 2, name })).toBeTruthy();
     }
     expect(screen.getAllByRole("button").length).toBeGreaterThan(4);
     expect(screen.getAllByRole("textbox").length).toBeGreaterThan(1);
     expect(screen.getByText("Aprobado")).toBeTruthy();
+  });
+
+  it("todos sus textos salen del catálogo y cambian con el idioma", () => {
+    render(<UiCatalog />, "en-US");
+    expect(screen.getByRole("heading", { level: 1, name: "Component catalog" })).toBeTruthy();
+    expect(screen.getByRole("group", { name: "Theme" })).toBeTruthy();
+    expect(screen.getByLabelText("Visitor name")).toBeTruthy();
+    expect(screen.getByText("Approved")).toBeTruthy();
+    expect(screen.queryByText("Aprobado")).toBeNull();
   });
 
   it("alterna entre tema claro, oscuro y el del sistema", () => {

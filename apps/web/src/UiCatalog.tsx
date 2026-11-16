@@ -1,23 +1,30 @@
 import { Badge, Button, Card, CardTitle, Field, Input } from "@atrio/ui";
 import type { BadgeTone, ButtonVariant } from "@atrio/ui";
+import { FormattedMessage, useIntl } from "@atrio/i18n";
+import type { MessageId } from "@atrio/i18n";
 import { useState } from "react";
 
 type ThemeChoice = "system" | "light" | "dark";
 
-const themes: Array<{ value: ThemeChoice; label: string }> = [
-  { value: "system", label: "Sistema" },
-  { value: "light", label: "Claro" },
-  { value: "dark", label: "Oscuro" },
+const themes: Array<{ value: ThemeChoice; id: MessageId }> = [
+  { value: "system", id: "ui.theme.system" },
+  { value: "light", id: "ui.theme.light" },
+  { value: "dark", id: "ui.theme.dark" },
 ];
 
-const buttonVariants: ButtonVariant[] = ["primary", "secondary", "ghost", "danger"];
+const buttonVariants: Array<{ variant: ButtonVariant; id: MessageId }> = [
+  { variant: "primary", id: "ui.button.primary" },
+  { variant: "secondary", id: "ui.button.secondary" },
+  { variant: "ghost", id: "ui.button.ghost" },
+  { variant: "danger", id: "ui.button.danger" },
+];
 
-const badgeTones: Array<{ tone: BadgeTone; label: string }> = [
-  { tone: "neutral", label: "Neutral" },
-  { tone: "primary", label: "Invitado" },
-  { tone: "success", label: "Aprobado" },
-  { tone: "danger", label: "Rechazado" },
-  { tone: "warning", label: "Por vencer" },
+const badgeTones: Array<{ tone: BadgeTone; id: MessageId }> = [
+  { tone: "neutral", id: "ui.badge.neutral" },
+  { tone: "primary", id: "ui.badge.primary" },
+  { tone: "success", id: "ui.badge.success" },
+  { tone: "danger", id: "ui.badge.danger" },
+  { tone: "warning", id: "ui.badge.warning" },
 ];
 
 function applyTheme(choice: ThemeChoice): void {
@@ -28,6 +35,7 @@ function applyTheme(choice: ThemeChoice): void {
 
 /** Catálogo de componentes de `@atrio/ui`: cada componente nuevo se agrega aquí con sus variantes. */
 export function UiCatalog() {
+  const intl = useIntl();
   const [theme, setTheme] = useState<ThemeChoice>(() =>
     document.documentElement.getAttribute("data-theme") === "dark" ? "dark" : "system",
   );
@@ -40,69 +48,100 @@ export function UiCatalog() {
   return (
     <main className="mx-auto flex min-h-dvh max-w-3xl flex-col gap-6 px-4 py-8">
       <header className="flex flex-col gap-3">
-        <h1 className="font-display text-2xl font-semibold">Catálogo de componentes</h1>
-        <div role="group" aria-label="Tema" className="flex flex-wrap gap-2">
-          {themes.map(({ value, label }) => (
+        <h1 className="font-display text-2xl font-semibold">
+          <FormattedMessage id="ui.title" />
+        </h1>
+        <div
+          role="group"
+          aria-label={intl.formatMessage({ id: "ui.theme.label" })}
+          className="flex flex-wrap gap-2"
+        >
+          {themes.map(({ value, id }) => (
             <Button
               key={value}
               variant={theme === value ? "primary" : "secondary"}
               aria-pressed={theme === value}
               onClick={() => chooseTheme(value)}
             >
-              {label}
+              <FormattedMessage id={id} />
             </Button>
           ))}
         </div>
       </header>
 
       <Card>
-        <CardTitle as="h2">Button</CardTitle>
+        <CardTitle as="h2">
+          <FormattedMessage id="ui.button.title" />
+        </CardTitle>
         <div className="flex flex-wrap gap-3">
-          {buttonVariants.map((variant) => (
+          {buttonVariants.map(({ variant, id }) => (
             <Button key={variant} variant={variant}>
-              {variant}
+              <FormattedMessage id={id} />
             </Button>
           ))}
         </div>
         <div className="flex flex-wrap gap-3">
-          <Button size="lg">Grande (garita)</Button>
-          <Button disabled>Deshabilitado</Button>
+          <Button size="lg">
+            <FormattedMessage id="ui.button.large" />
+          </Button>
+          <Button disabled>
+            <FormattedMessage id="ui.button.disabled" />
+          </Button>
           <Button asChild variant="secondary">
-            <a href="#button">Como enlace</a>
+            <a href="#button">
+              <FormattedMessage id="ui.button.asLink" />
+            </a>
           </Button>
         </div>
       </Card>
 
       <Card>
-        <CardTitle as="h2">Input y Field</CardTitle>
-        <Field label="Nombre del visitante" description="Como aparece en su documento.">
+        <CardTitle as="h2">
+          <FormattedMessage id="ui.field.title" />
+        </CardTitle>
+        <Field
+          label={intl.formatMessage({ id: "ui.field.visitor.label" })}
+          description={intl.formatMessage({ id: "ui.field.visitor.description" })}
+        >
           <Input name="visitor" autoComplete="off" />
         </Field>
-        <Field label="Teléfono" required error="Escribe un teléfono de 8 dígitos.">
+        <Field
+          label={intl.formatMessage({ id: "ui.field.phone.label" })}
+          required
+          error={intl.formatMessage({ id: "ui.field.phone.error" })}
+        >
           <Input name="phone" inputMode="numeric" defaultValue="55" />
         </Field>
-        <Field label="Unidad">
+        <Field label={intl.formatMessage({ id: "ui.field.unit.label" })}>
           <Input name="unit" disabled defaultValue="A-12" />
         </Field>
       </Card>
 
       <Card>
-        <CardTitle as="h2">Card</CardTitle>
+        <CardTitle as="h2">
+          <FormattedMessage id="ui.card.title" />
+        </CardTitle>
         <p className="text-sm text-text-muted">
-          Superficie con borde y sombra suave para agrupar contenido.
+          <FormattedMessage id="ui.card.description" />
         </p>
         <Card className="bg-surface-muted shadow-none">
-          <CardTitle as="h3">Tarjeta anidada</CardTitle>
-          <p className="text-sm">Contenido secundario.</p>
+          <CardTitle as="h3">
+            <FormattedMessage id="ui.card.nested.title" />
+          </CardTitle>
+          <p className="text-sm">
+            <FormattedMessage id="ui.card.nested.description" />
+          </p>
         </Card>
       </Card>
 
       <Card>
-        <CardTitle as="h2">Badge</CardTitle>
+        <CardTitle as="h2">
+          <FormattedMessage id="ui.badge.title" />
+        </CardTitle>
         <div className="flex flex-wrap gap-3">
-          {badgeTones.map(({ tone, label }) => (
+          {badgeTones.map(({ tone, id }) => (
             <Badge key={tone} tone={tone}>
-              {label}
+              <FormattedMessage id={id} />
             </Badge>
           ))}
         </div>
