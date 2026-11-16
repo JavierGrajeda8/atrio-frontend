@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="Atrio">
+  <!-- Ícono PROVISIONAL dibujado desde docs/BRAND.md §3: arco de medio punto con franja de luz.
+       Se reemplaza cuando exista el logo final. Colores: añil 600, cal y maíz 400 de BRAND §4.1. -->
+  <rect width="512" height="512" fill="#33419C"/>
+  <path d="M136 408V248a120 120 0 0 1 240 0v160z" fill="#FAF7F2"/>
+  <path d="M200 408V262a56 56 0 0 1 112 0v146z" fill="#F2B33D"/>
+</svg>
