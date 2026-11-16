@@ -7,3 +7,4 @@ openapi
 .github
 *.md
 packages/ui/src/theme.css
+packages/api-client/src/generated

@@ -2,7 +2,16 @@ import js from "@eslint/js";
 import tseslint from "typescript-eslint";
 
 export default tseslint.config(
-  { ignores: ["**/dist/**", "**/node_modules/**", "**/coverage/**", "docs/**", "openapi/**"] },
+  {
+    ignores: [
+      "**/dist/**",
+      "**/node_modules/**",
+      "**/coverage/**",
+      "docs/**",
+      "openapi/**",
+      "packages/api-client/src/generated/**",
+    ],
+  },
   js.configs.recommended,
   ...tseslint.configs.strict,
   {

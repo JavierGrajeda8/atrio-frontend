@@ -47,7 +47,7 @@ security-gitleaks:
 	gitleaks git --no-banner --redact
 
 api-client:
-	$(call pending,api-client,#12,FR-05a)
+	$(PNPM) --filter @atrio/api-client generate
 
 e2e:
 	$(call pending,e2e,#23,FR-10a)
