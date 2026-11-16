@@ -61,32 +61,63 @@ describe("@atrio/i18n", () => {
   });
 
   describe("formatDateInTimezone", () => {
-    it("formatea una fecha en la zona del residencial", () => {
-      const date = new Date("2026-10-08T18:00:00Z");
-      const formatted = formatDateInTimezone(date, "America/Guatemala", "es-GT");
-      expect(formatted).toBeDefined();
-      expect(formatted).toMatch(/\d{2}\/\d{2}\/\d{4}/); // Match date format
+    const instant = new Date("2026-10-08T03:30:00Z");
+
+    it("muestra la fecha y hora en la zona del residencial, no en UTC", () => {
+      const formatted = formatDateInTimezone(instant, "America/Guatemala", "es-GT");
+      // UTC-6 sin horario de verano: el 8 a las 03:30 UTC es el 7 a las 21:30 locales.
+      expect(formatted).toContain("07/10/2026");
+      expect(formatted).toContain("09:30:00");
     });
 
-    it("acepta string de fecha", () => {
-      const dateString = "2026-10-08T18:00:00Z";
-      const formatted = formatDateInTimezone(dateString, "America/Guatemala", "es-GT");
-      expect(formatted).toBeDefined();
+    it("el mismo instante se ve distinto según la zona del residencial", () => {
+      const guatemala = formatDateInTimezone(instant, "America/Guatemala", "es-GT");
+      const tokyo = formatDateInTimezone(instant, "Asia/Tokyo", "es-GT");
+      const utc = formatDateInTimezone(instant, "UTC", "es-GT");
+      expect(tokyo).toContain("08/10/2026");
+      expect(tokyo).toContain("12:30:00");
+      expect(utc).toContain("08/10/2026");
+      expect(utc).toContain("03:30:00");
+      expect(new Set([guatemala, tokyo, utc]).size).toBe(3);
     });
 
-    it("acepta timestamp numérico", () => {
-      const timestamp = 1728409200000;
-      const formatted = formatDateInTimezone(timestamp, "America/Guatemala", "es-GT");
-      expect(formatted).toBeDefined();
+    it("ignora la zona horaria del dispositivo", () => {
+      const original = process.env.TZ;
+      process.env.TZ = "Asia/Tokyo";
+      try {
+        // Condición previa: el dispositivo realmente está en Tokio (12:30 locales).
+        expect(instant.getHours()).toBe(12);
+        const formatted = formatDateInTimezone(instant, "America/Guatemala", "es-GT");
+        expect(formatted).toContain("07/10/2026");
+        expect(formatted).toContain("09:30:00");
+      } finally {
+        if (original === undefined) delete process.env.TZ;
+        else process.env.TZ = original;
+      }
+    });
+
+    it("acepta Date, string ISO y timestamp con el mismo resultado", () => {
+      const fromDate = formatDateInTimezone(instant, "America/Guatemala", "es-GT");
+      expect(formatDateInTimezone(instant.toISOString(), "America/Guatemala", "es-GT")).toBe(
+        fromDate,
+      );
+      expect(formatDateInTimezone(instant.getTime(), "America/Guatemala", "es-GT")).toBe(fromDate);
+    });
+
+    it("respeta el idioma pedido", () => {
+      expect(formatDateInTimezone(instant, "America/Guatemala", "en-US")).toContain("10/07/2026");
     });
   });
 
   describe("formatTimeInTimezone", () => {
     it("formatea solo la hora en la zona del residencial", () => {
-      const date = new Date("2026-10-08T18:00:00Z");
-      const formatted = formatTimeInTimezone(date, "America/Guatemala", "es-GT");
-      expect(formatted).toBeDefined();
-      expect(formatted).toMatch(/\d{2}:\d{2}:\d{2}/); // Match time format
+      const formatted = formatTimeInTimezone(
+        new Date("2026-10-08T03:30:00Z"),
+        "America/Guatemala",
+        "es-GT",
+      );
+      expect(formatted).toContain("09:30:00");
+      expect(formatted).not.toContain("2026");
     });
   });
 

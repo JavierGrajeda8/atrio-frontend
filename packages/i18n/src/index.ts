@@ -1,16 +1,40 @@
-import type { IntlConfig } from "react-intl";
+import { createElement } from "react";
+import type { ReactNode } from "react";
+import { IntlProvider } from "react-intl";
 import messagesesGT from "./locales/es-GT.json";
 import messagesEnUS from "./locales/en-US.json";
 
 export const PACKAGE_NAME = "@atrio/i18n";
 
+// Todo texto visible se usa desde aquí: `<FormattedMessage>` y `useIntl()` (I18N-01).
+export { FormattedMessage, useIntl } from "react-intl";
+
 export type Locale = "es-GT" | "en-US" | "es-MX" | "es-CO";
 
-export const LOCALES: Record<Locale, Record<string, string>> = {
-  "es-GT": messagesesGT,
-  "en-US": messagesEnUS,
-  "es-MX": messagesesGT, // Use es-GT as fallback for now
-  "es-CO": messagesesGT, // Use es-GT as fallback for now
+/** Ids de los mensajes: `es-GT` es el catálogo de referencia. */
+export type MessageId = keyof typeof messagesesGT;
+export type Messages = Record<MessageId, string>;
+
+declare global {
+  // Hace que `<FormattedMessage id>` y `formatMessage({ id })` solo acepten ids existentes.
+  // react-intl solo permite tipar los ids con esta augmentación de `namespace`.
+  // eslint-disable-next-line @typescript-eslint/no-namespace
+  namespace FormatjsIntl {
+    interface Message {
+      ids: MessageId;
+    }
+  }
+}
+
+// Tipar cada catálogo como `Messages` hace que tsc falle si a `en-US` le falta una clave.
+const esGT: Messages = messagesesGT;
+const enUS: Messages = messagesEnUS;
+
+export const LOCALES: Record<Locale, Messages> = {
+  "es-GT": esGT,
+  "en-US": enUS,
+  "es-MX": esGT, // Use es-GT as fallback for now
+  "es-CO": esGT, // Use es-GT as fallback for now
 };
 
 export const DEFAULT_LOCALE: Locale = "es-GT";
@@ -25,19 +49,34 @@ export function getSupportedLocales(): Locale[] {
 /**
  * Get messages for a specific locale
  */
-export function getMessages(locale: Locale): Record<string, string> {
+export function getMessages(locale: Locale): Messages {
   return LOCALES[locale] || LOCALES[DEFAULT_LOCALE];
 }
 
 /**
  * Get Intl config for react-intl integration
  */
-export function getIntlConfig(locale: Locale): Partial<IntlConfig> {
+export function getIntlConfig(locale: Locale): {
+  locale: Locale;
+  defaultLocale: Locale;
+  messages: Messages;
+} {
   return {
     locale,
     messages: getMessages(locale),
     defaultLocale: DEFAULT_LOCALE,
   };
+}
+
+/** Envuelve la app con los mensajes del idioma; `es-GT` por defecto (I18N-02). */
+export function I18nProvider({
+  locale = DEFAULT_LOCALE,
+  children,
+}: {
+  locale?: Locale;
+  children: ReactNode;
+}) {
+  return createElement(IntlProvider, getIntlConfig(locale), children);
 }
 
 /**
@@ -84,12 +123,12 @@ export function formatTimeInTimezone(
   timezone: string,
   locale: Locale = DEFAULT_LOCALE,
 ): string {
-  return formatDateInTimezone(date, timezone, locale, {
+  return new Intl.DateTimeFormat(locale, {
     hour: "2-digit",
     minute: "2-digit",
     second: "2-digit",
     timeZone: timezone,
-  });
+  }).format(typeof date === "object" ? date : new Date(date));
 }
 
 /**
@@ -163,6 +202,3 @@ export function validateLocales(): { valid: boolean; missingKeys?: Record<string
     missingKeys: Object.keys(missingKeys).length > 0 ? missingKeys : undefined,
   };
 }
-
-// Export ESLint rule
-export { default as noLiteralStringRule } from "./eslint-rule";

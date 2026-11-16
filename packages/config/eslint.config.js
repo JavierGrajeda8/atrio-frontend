@@ -1,5 +1,6 @@
 import js from "@eslint/js";
 import tseslint from "typescript-eslint";
+import noLiteralJsxText from "./eslint-rules/no-literal-jsx-text.js";
 
 export default tseslint.config(
   {
@@ -24,10 +25,11 @@ export default tseslint.config(
     },
   },
   {
+    // Texto visible solo desde los catálogos de @atrio/i18n (I18N-01). Las pruebas pueden
+    // usar literales: no son texto que vea el usuario.
     files: ["**/*.tsx"],
-    rules: {
-      // i18n/no-literal-string rule will be enabled when react components are added
-      // This rule prevents literal strings in JSX - use <FormattedMessage> or useIntl()
-    },
+    ignores: ["**/*.test.tsx"],
+    plugins: { atrio: { rules: { "no-literal-jsx-text": noLiteralJsxText } } },
+    rules: { "atrio/no-literal-jsx-text": "error" },
   },
 );
