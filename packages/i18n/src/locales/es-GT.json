@@ -138,5 +138,21 @@
   "guard.home.scan": "Escanear QR",
   "guard.home.code": "Ingresar código",
   "guard.home.walkIn": "Sin pase",
-  "guard.route.back": "Volver al inicio"
+  "guard.route.back": "Volver al inicio",
+  "web.brand": "atrio",
+  "web.documentTitle": "{page} · Atrio",
+  "web.skipToContent": "Saltar al contenido",
+  "web.nav.label": "Navegación principal",
+  "web.nav.resident": "Residente",
+  "web.nav.admin": "Administración",
+  "web.nav.home": "Inicio",
+  "web.nav.visits": "Visitas",
+  "web.nav.announcements": "Comunicados",
+  "web.nav.adminPanel": "Panel",
+  "web.nav.adminManagement": "Gestión",
+  "web.nav.adminLog": "Bitácora",
+  "web.page.empty": "Esta sección todavía no tiene contenido.",
+  "web.notFound.title": "Página no encontrada",
+  "web.notFound.description": "La dirección que abriste no existe o cambió de lugar.",
+  "web.notFound.back": "Ir al inicio"
 }

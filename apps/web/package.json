@@ -11,6 +11,7 @@
   "dependencies": {
     "@atrio/i18n": "workspace:^",
     "@atrio/ui": "workspace:^",
+    "@tanstack/react-router": "^1.170.46",
     "react": "^19.0.0",
     "react-dom": "^19.0.0"
   },

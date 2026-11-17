@@ -1,7 +1,6 @@
-import { UiCatalog } from "./UiCatalog";
+import { RouterProvider } from "@tanstack/react-router";
+import type { createAppRouter } from "./routes";
 
-// Ruta simple hasta que el enrutado real llegue con FR-08a.
-export function App() {
-  if (window.location.pathname === "/_ui") return <UiCatalog />;
-  return <main data-app="web" className="bg-bg font-body text-text min-h-dvh" />;
+export function App({ router }: { router: ReturnType<typeof createAppRouter> }) {
+  return <RouterProvider router={router} />;
 }

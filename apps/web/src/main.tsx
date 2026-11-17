@@ -3,6 +3,7 @@ import { createRoot } from "react-dom/client";
 import { I18nProvider } from "@atrio/i18n";
 import "@atrio/ui/styles.css";
 import { App } from "./App";
+import { createAppRouter } from "./routes";
 
 const root = document.getElementById("root");
 if (!root) throw new Error("Falta el elemento #root");
@@ -10,7 +11,7 @@ if (!root) throw new Error("Falta el elemento #root");
 createRoot(root).render(
   <StrictMode>
     <I18nProvider>
-      <App />
+      <App router={createAppRouter()} />
     </I18nProvider>
   </StrictMode>,
 );
