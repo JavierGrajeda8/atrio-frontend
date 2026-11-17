@@ -138,5 +138,21 @@
   "guard.home.scan": "Scan QR",
   "guard.home.code": "Enter code",
   "guard.home.walkIn": "No pass",
-  "guard.route.back": "Back to start"
+  "guard.route.back": "Back to start",
+  "web.brand": "atrio",
+  "web.documentTitle": "{page} · Atrio",
+  "web.skipToContent": "Skip to content",
+  "web.nav.label": "Main navigation",
+  "web.nav.resident": "Resident",
+  "web.nav.admin": "Administration",
+  "web.nav.home": "Home",
+  "web.nav.visits": "Visits",
+  "web.nav.announcements": "Announcements",
+  "web.nav.adminPanel": "Dashboard",
+  "web.nav.adminManagement": "Management",
+  "web.nav.adminLog": "Activity log",
+  "web.page.empty": "This section has no content yet.",
+  "web.notFound.title": "Page not found",
+  "web.notFound.description": "The address you opened doesn't exist or has moved.",
+  "web.notFound.back": "Go to start"
 }

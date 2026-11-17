@@ -5,7 +5,6 @@ import { axe } from "vitest-axe";
 import { afterEach, describe, expect, it } from "vitest";
 import { I18nProvider } from "@atrio/i18n";
 import type { Locale } from "@atrio/i18n";
-import { App } from "./App";
 import { UiCatalog } from "./UiCatalog";
 
 function render(ui: ReactElement, locale?: Locale) {
@@ -66,16 +65,5 @@ describe("página /_ui", () => {
 
     fireEvent.click(screen.getByRole("button", { name: "Oscuro" }));
     expect((await axe(container)).violations).toEqual([]);
-  });
-
-  it("App la sirve solo en /_ui", () => {
-    window.history.pushState({}, "", "/_ui");
-    const { unmount } = render(<App />);
-    expect(screen.getByRole("heading", { level: 1, name: "Catálogo de componentes" })).toBeTruthy();
-    unmount();
-
-    window.history.pushState({}, "", "/");
-    render(<App />);
-    expect(screen.queryByRole("heading", { level: 1 })).toBeNull();
   });
 });
