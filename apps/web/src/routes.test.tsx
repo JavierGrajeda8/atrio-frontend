@@ -4,7 +4,7 @@ import { I18nProvider } from "@atrio/i18n";
 import type { Locale } from "@atrio/i18n";
 import { createMemoryHistory } from "@tanstack/react-router";
 import { axe } from "vitest-axe";
-import { afterEach, describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import { App } from "./App";
 import { createAppRouter } from "./routes";
 
@@ -23,6 +23,9 @@ async function renderAt(path: string, locale?: Locale) {
 
 afterEach(() => {
   cleanup();
+  // Aquí y no al final de cada prueba: si una falla, no deja espías ni globales simulados.
+  vi.restoreAllMocks();
+  vi.unstubAllGlobals();
   document.documentElement.removeAttribute("data-theme");
   document.title = "";
 });
@@ -138,12 +141,122 @@ describe("/_ui pasa a ser una ruta del router (FR-03b)", () => {
   });
 });
 
+describe("login vacío, sin backend de autenticación (SPEC §8.2)", () => {
+  it("muestra la pantalla de login fuera del layout de la app", async () => {
+    await renderAt("/login");
+    expect(await screen.findByRole("heading", { level: 1, name: "Inicia sesión" })).toBeTruthy();
+    expect(screen.getByText(/te enviaremos un código/)).toBeTruthy();
+    expect(screen.getByLabelText("Teléfono").getAttribute("type")).toBe("tel");
+    expect(screen.queryByRole("navigation")).toBeNull();
+    expect(document.title).toBe("Inicia sesión · Atrio");
+  });
+
+  it("deja claro que no está disponible: el botón está deshabilitado y explicado", async () => {
+    await renderAt("/login");
+    const submit = await screen.findByRole("button", { name: "Enviar código" });
+    expect((submit as HTMLButtonElement).disabled).toBe(true);
+    expect(screen.getByText(/todavía no está disponible/)).toBeTruthy();
+    expect(submit.getAttribute("aria-describedby")).toBe(
+      screen.getByText(/todavía no está disponible/).id,
+    );
+  });
+
+  it("no envía, guarda ni registra nada, ni escribiendo un teléfono y pulsando Enter", async () => {
+    const fetchSpy = vi.spyOn(globalThis, "fetch");
+    const consoleSpy = vi.spyOn(console, "log");
+    const storage = () => ({
+      length: 0,
+      getItem: vi.fn(() => null),
+      setItem: vi.fn(),
+      removeItem: vi.fn(),
+      clear: vi.fn(),
+      key: vi.fn(() => null),
+    });
+    const local = storage();
+    const session = storage();
+    vi.stubGlobal("localStorage", local);
+    vi.stubGlobal("sessionStorage", session);
+    const { router } = await renderAt("/login");
+    const phone = (await screen.findByLabelText("Teléfono")) as HTMLInputElement;
+
+    fireEvent.change(phone, { target: { value: "+502 5555-1234" } });
+    const form = phone.closest("form") as HTMLFormElement;
+    const submitEvent = new Event("submit", { bubbles: true, cancelable: true });
+    form.dispatchEvent(submitEvent);
+    fireEvent.keyDown(phone, { key: "Enter", code: "Enter" });
+
+    expect(submitEvent.defaultPrevented).toBe(true); // el formulario ignora el envío
+    expect(router.state.location.pathname).toBe("/login");
+    expect(fetchSpy).not.toHaveBeenCalled();
+    // Node 26 define su propio `localStorage` experimental y tapa el de jsdom: se simulan ambos
+    // almacenamientos para comprobar que NUNCA se escribe en ellos.
+    expect(local.setItem).not.toHaveBeenCalled();
+    expect(session.setItem).not.toHaveBeenCalled();
+    expect(document.cookie).toBe("");
+    expect(consoleSpy).not.toHaveBeenCalled();
+  });
+
+  it("el campo pide el teclado y el autocompletado de teléfono", async () => {
+    await renderAt("/login");
+    const phone = await screen.findByLabelText("Teléfono");
+    expect(phone.getAttribute("inputmode")).toBe("tel");
+    expect(phone.getAttribute("autocomplete")).toBe("tel");
+  });
+
+  it("también en en-US", async () => {
+    await renderAt("/login", "en-US");
+    expect(await screen.findByRole("heading", { level: 1, name: "Sign in" })).toBeTruthy();
+    expect(screen.getByLabelText("Phone")).toBeTruthy();
+    expect(screen.getByRole("button", { name: "Send code" })).toBeTruthy();
+  });
+});
+
+describe("selector de residencial vacío (SPEC §8.2)", () => {
+  it("muestra el estado vacío, sin datos ni lista", async () => {
+    await renderAt("/residentials");
+    expect(
+      await screen.findByRole("heading", { level: 1, name: "Elige tu residencial" }),
+    ).toBeTruthy();
+    expect(
+      screen.getByRole("heading", { level: 2, name: "Todavía no tienes residenciales" }),
+    ).toBeTruthy();
+    expect(screen.getByText(/te dé acceso a un residencial, aparecerá aquí/)).toBeTruthy();
+    expect(screen.queryByRole("list")).toBeNull();
+    expect(screen.queryByRole("listitem")).toBeNull();
+    expect(screen.queryByRole("navigation")).toBeNull();
+    expect(document.title).toBe("Elige tu residencial · Atrio");
+  });
+
+  it("no pide datos al backend: el contrato aún no expone las membresías", async () => {
+    const fetchSpy = vi.spyOn(globalThis, "fetch");
+    await renderAt("/residentials");
+    await screen.findByRole("heading", { level: 1 });
+    expect(fetchSpy).not.toHaveBeenCalled();
+  });
+
+  it("también en en-US", async () => {
+    await renderAt("/residentials", "en-US");
+    expect(
+      await screen.findByRole("heading", { level: 1, name: "Choose your residential" }),
+    ).toBeTruthy();
+    expect(
+      screen.getByRole("heading", { level: 2, name: "You don't have any residentials yet" }),
+    ).toBeTruthy();
+  });
+});
+
 describe("accesibilidad (axe)", () => {
   // jsdom no evalúa `color-contrast`; el contraste de los tokens se mide en tests/ui-contrast.
   for (const theme of ["light", "dark"] as const) {
     it(`ninguna pantalla reporta violaciones, tema ${theme}`, async () => {
       document.documentElement.setAttribute("data-theme", theme);
-      for (const path of [...SCREENS.map(([route]) => route), "/no-existe", "/_ui"]) {
+      for (const path of [
+        ...SCREENS.map(([route]) => route),
+        "/login",
+        "/residentials",
+        "/no-existe",
+        "/_ui",
+      ]) {
         const { container, unmount } = await renderAt(path);
         await screen.findAllByRole("heading", { level: 1 });
         const { violations } = await axe(container);

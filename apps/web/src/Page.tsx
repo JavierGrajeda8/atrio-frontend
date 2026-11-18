@@ -5,7 +5,7 @@ import { Link } from "@tanstack/react-router";
 import { useEffect } from "react";
 
 // El título del documento cambia con la ruta: así un lector de pantalla anuncia dónde está.
-function useDocumentTitle(page: string): void {
+export function useDocumentTitle(page: string): void {
   const intl = useIntl();
   const title = intl.formatMessage({ id: "web.documentTitle" }, { page });
   useEffect(() => {

@@ -154,5 +154,13 @@
   "web.page.empty": "Esta sección todavía no tiene contenido.",
   "web.notFound.title": "Página no encontrada",
   "web.notFound.description": "La dirección que abriste no existe o cambió de lugar.",
-  "web.notFound.back": "Ir al inicio"
+  "web.notFound.back": "Ir al inicio",
+  "web.login.title": "Inicia sesión",
+  "web.login.description": "Ingresa tu teléfono y te enviaremos un código para verificar que eres tú.",
+  "web.login.phone.label": "Teléfono",
+  "web.login.submit": "Enviar código",
+  "web.login.unavailable": "El inicio de sesión todavía no está disponible. Lo estamos preparando.",
+  "web.residentials.title": "Elige tu residencial",
+  "web.residentials.empty.title": "Todavía no tienes residenciales",
+  "web.residentials.empty.description": "Cuando un administrador te dé acceso a un residencial, aparecerá aquí."
 }

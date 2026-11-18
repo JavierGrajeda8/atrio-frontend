@@ -2,6 +2,9 @@ import { createRootRoute, createRoute, createRouter, Outlet } from "@tanstack/re
 import type { RouterHistory } from "@tanstack/react-router";
 import type { MessageId } from "@atrio/i18n";
 import { NotFound, Page } from "./Page";
+import { AuthLayout } from "./AuthLayout";
+import { LoginPage } from "./LoginPage";
+import { ResidentialSelectorPage } from "./ResidentialSelectorPage";
 import { Shell } from "./Shell";
 import { UiCatalog } from "./UiCatalog";
 
@@ -9,6 +12,13 @@ const rootRoute = createRootRoute({ component: Outlet, notFoundComponent: NotFou
 
 // Layout residente/administrador: envuelve las pantallas de la app.
 const shellRoute = createRoute({ getParentRoute: () => rootRoute, id: "shell", component: Shell });
+
+// Pantallas de entrada (sin la navegación de la app): login y selector de residencial.
+const authRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  id: "auth",
+  component: AuthLayout,
+});
 
 // Genérico en `path` para conservar la ruta literal y que `<Link to>` esté tipado.
 const page = <TPath extends string>(path: TPath, titleId: MessageId) =>
@@ -26,6 +36,14 @@ const routeTree = rootRoute.addChildren([
     page("/admin", "web.nav.adminPanel"),
     page("/admin/management", "web.nav.adminManagement"),
     page("/admin/log", "web.nav.adminLog"),
+  ]),
+  authRoute.addChildren([
+    createRoute({ getParentRoute: () => authRoute, path: "/login", component: LoginPage }),
+    createRoute({
+      getParentRoute: () => authRoute,
+      path: "/residentials",
+      component: ResidentialSelectorPage,
+    }),
   ]),
   // Catálogo de componentes (FR-03b): fuera del layout, tiene su propia página completa.
   createRoute({ getParentRoute: () => rootRoute, path: "/_ui", component: UiCatalog }),
