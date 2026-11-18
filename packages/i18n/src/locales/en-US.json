@@ -154,5 +154,13 @@
   "web.page.empty": "This section has no content yet.",
   "web.notFound.title": "Page not found",
   "web.notFound.description": "The address you opened doesn't exist or has moved.",
-  "web.notFound.back": "Go to start"
+  "web.notFound.back": "Go to start",
+  "web.login.title": "Sign in",
+  "web.login.description": "Enter your phone number and we'll send you a code to verify it's you.",
+  "web.login.phone.label": "Phone",
+  "web.login.submit": "Send code",
+  "web.login.unavailable": "Sign-in isn't available yet. We're getting it ready.",
+  "web.residentials.title": "Choose your residential",
+  "web.residentials.empty.title": "You don't have any residentials yet",
+  "web.residentials.empty.description": "When an administrator gives you access to a residential, it will appear here."
 }
