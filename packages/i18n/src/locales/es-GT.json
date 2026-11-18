@@ -162,5 +162,18 @@
   "web.login.unavailable": "El inicio de sesión todavía no está disponible. Lo estamos preparando.",
   "web.residentials.title": "Elige tu residencial",
   "web.residentials.empty.title": "Todavía no tienes residenciales",
-  "web.residentials.empty.description": "Cuando un administrador te dé acceso a un residencial, aparecerá aquí."
+  "web.residentials.empty.description": "Cuando un administrador te dé acceso a un residencial, aparecerá aquí.",
+  "api.error.VALIDATION_ERROR": "Revisa los datos que enviaste: hay campos que no son válidos.",
+  "api.error.UNAUTHENTICATED": "Inicia sesión para continuar.",
+  "api.error.FORBIDDEN": "No tienes permiso para realizar esta acción.",
+  "api.error.NOT_FOUND": "No encontramos lo que buscas.",
+  "api.error.METHOD_NOT_ALLOWED": "Esta acción no está disponible para este recurso.",
+  "api.error.HTTP_ERROR": "No pudimos completar la solicitud. Inténtalo de nuevo.",
+  "api.error.INTERNAL_ERROR": "Algo salió mal de nuestro lado. Inténtalo de nuevo en unos minutos.",
+  "api.error.MEMBERSHIP_NOT_ACTIVE": "Tu membresía en este residencial no está activa.",
+  "api.error.STEP_UP_REQUIRED": "Confirma tu identidad de nuevo para realizar esta acción.",
+  "api.error.PRECONDITION_REQUIRED": "Vuelve a cargar los datos antes de modificarlos.",
+  "api.error.PRECONDITION_FAILED": "Alguien más modificó estos datos. Recárgalos e inténtalo de nuevo.",
+  "api.error.SERVICE_UNAVAILABLE": "El servicio no está disponible por ahora. Inténtalo en unos minutos.",
+  "api.error.NETWORK_ERROR": "No hay conexión con el servidor. Revisa tu conexión e inténtalo de nuevo."
 }

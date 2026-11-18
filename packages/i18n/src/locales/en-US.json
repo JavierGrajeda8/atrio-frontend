@@ -162,5 +162,18 @@
   "web.login.unavailable": "Sign-in isn't available yet. We're getting it ready.",
   "web.residentials.title": "Choose your residential",
   "web.residentials.empty.title": "You don't have any residentials yet",
-  "web.residentials.empty.description": "When an administrator gives you access to a residential, it will appear here."
+  "web.residentials.empty.description": "When an administrator gives you access to a residential, it will appear here.",
+  "api.error.VALIDATION_ERROR": "Check the data you sent: some fields are not valid.",
+  "api.error.UNAUTHENTICATED": "Sign in to continue.",
+  "api.error.FORBIDDEN": "You don't have permission to do this.",
+  "api.error.NOT_FOUND": "We couldn't find what you're looking for.",
+  "api.error.METHOD_NOT_ALLOWED": "This action isn't available for this resource.",
+  "api.error.HTTP_ERROR": "We couldn't complete the request. Please try again.",
+  "api.error.INTERNAL_ERROR": "Something went wrong on our side. Please try again in a few minutes.",
+  "api.error.MEMBERSHIP_NOT_ACTIVE": "Your membership in this residential is not active.",
+  "api.error.STEP_UP_REQUIRED": "Confirm your identity again to do this.",
+  "api.error.PRECONDITION_REQUIRED": "Reload the data before changing it.",
+  "api.error.PRECONDITION_FAILED": "Someone else changed this data. Reload it and try again.",
+  "api.error.SERVICE_UNAVAILABLE": "The service is unavailable right now. Please try again in a few minutes.",
+  "api.error.NETWORK_ERROR": "Can't reach the server. Check your connection and try again."
 }

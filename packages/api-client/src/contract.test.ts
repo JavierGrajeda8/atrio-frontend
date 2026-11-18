@@ -19,7 +19,7 @@ type Contract = {
 function compileAgainst(contract: Contract): { status: number | null; output: string } {
   rmSync(workDir, { recursive: true, force: true });
   mkdirSync(join(workDir, "src", "generated"), { recursive: true });
-  for (const file of ["index.ts", "contract.fixture.ts"]) {
+  for (const file of ["index.ts", "errors.ts", "status-codes.json", "contract.fixture.ts"]) {
     cpSync(join(pkgDir, "src", file), join(workDir, "src", file));
   }
   writeFileSync(join(workDir, "contract.json"), JSON.stringify(contract));
