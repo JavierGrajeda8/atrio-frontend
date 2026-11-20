@@ -2,12 +2,12 @@ import { readFileSync } from "node:fs";
 import { setupServer } from "msw/node";
 import { HttpResponse, http } from "msw";
 import { afterAll, afterEach, beforeAll, describe, expect, it } from "vitest";
-import { ApiError, createApiClient, isApiError } from "./index";
+import { ApiError, createApiClient, createTokenStore, isApiError } from "./index";
 import { defaultHandlers, mockHandler, mockOperations } from "./mocks";
 
 const BASE = "http://api.test";
 const ID = "3fa85f64-5717-4562-b3fc-2c963f66afa6";
-const client = createApiClient({ baseUrl: BASE });
+const client = createApiClient({ baseUrl: BASE, tokenStore: createTokenStore() });
 const getResidential = () =>
   client.GET("/api/v1/residentials/{residential_id}", { params: { path: { residential_id: ID } } });
 
@@ -198,6 +198,7 @@ describe("fetch del cliente", () => {
     const calls: string[] = [];
     const custom = createApiClient({
       baseUrl: BASE,
+      tokenStore: createTokenStore(),
       fetch: async (request) => {
         calls.push(request.url);
         return Response.json(mockOperations["get_residential"].responses[200].body);

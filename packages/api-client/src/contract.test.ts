@@ -2,7 +2,7 @@ import { spawnSync } from "node:child_process";
 import { cpSync, existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { join, resolve } from "node:path";
 import { afterAll, describe, expect, it } from "vitest";
-import { createApiClient } from "./index";
+import { createApiClient, createTokenStore } from "./index";
 import { residentialName } from "./contract.fixture";
 
 const pkgDir = "packages/api-client";
@@ -19,7 +19,13 @@ type Contract = {
 function compileAgainst(contract: Contract): { status: number | null; output: string } {
   rmSync(workDir, { recursive: true, force: true });
   mkdirSync(join(workDir, "src", "generated"), { recursive: true });
-  for (const file of ["index.ts", "errors.ts", "status-codes.json", "contract.fixture.ts"]) {
+  for (const file of [
+    "index.ts",
+    "errors.ts",
+    "session.ts",
+    "status-codes.json",
+    "contract.fixture.ts",
+  ]) {
     cpSync(join(pkgDir, "src", file), join(workDir, "src", file));
   }
   writeFileSync(join(workDir, "contract.json"), JSON.stringify(contract));
@@ -73,6 +79,7 @@ describe("cliente generado desde openapi/openapi.json", () => {
     const urls: string[] = [];
     const client = createApiClient({
       baseUrl: "http://api.test",
+      tokenStore: createTokenStore(),
       fetch: async (request) => {
         urls.push(`${request.method} ${new URL(request.url).pathname}`);
         return Response.json({ name: "Residencial Los Olivos" });
