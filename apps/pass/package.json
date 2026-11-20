@@ -13,7 +13,9 @@
   },
   "devDependencies": {
     "@atrio/config": "workspace:*",
+    "@atrio/i18n": "workspace:^",
     "@preact/preset-vite": "^2.0.0",
-    "vite": "^8.0.0"
+    "vite": "^8.0.0",
+    "vitest-axe": "^0.1.0"
   }
 }
