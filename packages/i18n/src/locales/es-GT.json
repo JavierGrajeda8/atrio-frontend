@@ -175,5 +175,19 @@
   "api.error.PRECONDITION_REQUIRED": "Vuelve a cargar los datos antes de modificarlos.",
   "api.error.PRECONDITION_FAILED": "Alguien más modificó estos datos. Recárgalos e inténtalo de nuevo.",
   "api.error.SERVICE_UNAVAILABLE": "El servicio no está disponible por ahora. Inténtalo en unos minutos.",
-  "api.error.NETWORK_ERROR": "No hay conexión con el servidor. Revisa tu conexión e inténtalo de nuevo."
+  "api.error.NETWORK_ERROR": "No hay conexión con el servidor. Revisa tu conexión e inténtalo de nuevo.",
+  "pass.title": "Tu pase de visita",
+  "pass.loading": "Cargando tu pase…",
+  "pass.invalid.title": "Este enlace no es válido",
+  "pass.invalid.body": "Pide un pase nuevo a tu anfitrión.",
+  "pass.offline": "Sin conexión. Vuelve a conectarte para ver tu pase.",
+  "pass.field.residential": "Residencial",
+  "pass.field.address": "Dirección",
+  "pass.field.visitor": "Visitante",
+  "pass.field.validity": "Vigencia",
+  "pass.field.code": "Código",
+  "pass.field.status": "Estado",
+  "pass.directions": "Cómo llegar",
+  "pass.qr": "Código QR del pase",
+  "pass.footer": "Pase generado con Atrio"
 }
