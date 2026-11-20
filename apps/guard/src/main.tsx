@@ -1,3 +1,4 @@
+import { installTrustedTypes } from "./trustedTypes";
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import { I18nProvider } from "@atrio/i18n";
@@ -5,6 +6,9 @@ import "@atrio/ui/styles.css";
 import { App } from "./App";
 import { initGuardDb } from "./db/db";
 import { startUpdatePolicy } from "./update/register";
+
+// Antes de cualquier otra cosa: el registro del service worker la necesita (SEC-65).
+installTrustedTypes();
 
 const root = document.getElementById("root");
 if (!root) throw new Error("Falta el elemento #root");

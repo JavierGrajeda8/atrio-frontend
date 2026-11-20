@@ -95,34 +95,34 @@ describe("shell sin conexión: el service worker precachea lo necesario", () => 
   });
 
   it("las navegaciones se resuelven con el shell (index.html)", () => {
-    expect(sw).toContain('createHandlerBoundToURL("index.html")');
+    expect(sw).toMatch(/\w="index\.html",\w+\(\)\.createHandlerBoundToURL\(\w\)/);
   });
 });
 
 describe("el service worker no cachea respuestas de la API", () => {
   it("no define cachés de ejecución: la única ruta es la navegación al shell", () => {
-    const workbox = readdirSync(dist).filter((name) => /^workbox-.*\.js$/.test(name));
-    expect(workbox).toHaveLength(1);
-    const code = sw + read(workbox[0] as string);
-    expect(code).not.toMatch(
+    // El runtime de Workbox va dentro de `sw.js` (Trusted Types prohíbe `importScripts`, SEC-65).
+    expect(readdirSync(dist).filter((name) => /^workbox-.*\.js$/.test(name))).toEqual([]);
+    expect(sw).not.toMatch(
       /StaleWhileRevalidate|NetworkFirst|CacheFirst|CacheOnly|NetworkOnly|runtimeCaching/,
     );
-    expect(sw.match(/registerRoute\(/g)).toHaveLength(1);
-    expect(sw).toContain("new e.NavigationRoute(");
+    expect(sw.match(/\.registerRoute\(/g)).toHaveLength(1);
+    expect(sw.match(/\{denylist:\[/g)).toHaveLength(1);
   });
 
   it("una navegación a /api/ no se responde con el shell", () => {
     expect(sw).toContain("denylist:[/^\\/api\\//]");
   });
 
-  it("el service worker no intercepta `fetch` por su cuenta ni usa Background Sync", () => {
-    expect(sw).not.toMatch(/addEventListener\("fetch"|addEventListener\("sync"/);
+  it("el service worker solo intercepta `fetch` con el enrutador de Workbox y no usa Background Sync", () => {
+    expect(sw.match(/addEventListener\("fetch"/g)).toHaveLength(1);
+    expect(sw).not.toMatch(/addEventListener\("sync"|BackgroundSync/);
   });
 
   it("una versión nueva no toma el control sola (OFF-09): no llama a skipWaiting ni clientsClaim", () => {
     // `skipWaiting` solo se ejecuta si la app lo pide con un mensaje explícito (FR-06d).
     expect(sw).not.toMatch(/clientsClaim\(\)/);
     expect(sw.match(/skipWaiting\(\)/g)).toHaveLength(1);
-    expect(sw).toMatch(/"SKIP_WAITING"===e\.data\.type&&self\.skipWaiting\(\)/);
+    expect(sw).toMatch(/"SKIP_WAITING"===\w\.data\.type&&self\.skipWaiting\(\)/);
   });
 });

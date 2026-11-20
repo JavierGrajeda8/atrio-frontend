@@ -2,6 +2,7 @@ import { readFileSync } from "node:fs";
 import react from "@vitejs/plugin-react";
 import tailwindcss from "@tailwindcss/vite";
 import { defineConfig } from "vite";
+import { securityHeadersPlugin } from "../../packages/config/security-headers";
 import { VitePWA } from "vite-plugin-pwa";
 
 // Los colores del manifiesto salen del tema generado desde docs/brand/tokens.css (sin hex sueltos).
@@ -14,6 +15,7 @@ function token(name: string): string {
 
 export default defineConfig({
   plugins: [
+    securityHeadersPlugin("guard"),
     react(),
     tailwindcss(),
     VitePWA({
@@ -51,6 +53,9 @@ export default defineConfig({
         navigateFallback: "index.html",
         navigateFallbackDenylist: [/^\/api\//],
         cleanupOutdatedCaches: true,
+        // Con Trusted Types el service worker no puede hacer `importScripts("workbox-….js")` con una
+        // cadena (SEC-65): el runtime de Workbox va dentro de `sw.js`.
+        inlineWorkboxRuntime: true,
       },
       // Los íconos ya entran por `globPatterns`; evita que figuren dos veces en el precaché.
       includeManifestIcons: false,
