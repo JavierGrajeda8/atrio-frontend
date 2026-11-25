@@ -46,6 +46,9 @@ describe("make e2e (FR-10a, REP-05)", () => {
     expect(script).toContain("down --volumes");
     expect(script).toContain("SELECT count(*) FROM residentials");
     expect(script).toContain("playwright test");
+    // Las pruebas de navegador (FR-10c) corren contra las apps construidas y necesitan Chromium.
+    expect(script).toContain('pnpm -r --filter "./apps/*" build');
+    expect(script).toContain("playwright install chromium");
   });
 
   it("el par de claves de los tokens de prueba es efímero: se genera, se usa y se borra (FR-10b)", () => {

@@ -98,6 +98,8 @@ jobs:
           node-version-file: .nvmrc
           cache: pnpm
       - run: pnpm install --frozen-lockfile
+      # Chromium y las bibliotecas del sistema que necesita (Playwright).
+      - run: pnpm --filter @atrio/e2e exec playwright install --with-deps chromium
       - name: Iniciar sesión en GHCR
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
