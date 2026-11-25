@@ -8,6 +8,7 @@ Copia todo este contenido a la raíz del repo **frontend**. Aquí vivirán las a
 | `openapi/openapi.json` | **Copia** del contrato de API (llega cuando el backend lo publique, issue BE-09) |
 | `AGENTS.md` | Reglas para Copilot en este repo |
 | `.github/copilot-instructions.md` | Resumen de reglas que Copilot carga en cada conversación |
+| `frontend-docs/` | Guías propias de este repo (a diferencia de `docs/`, se editan aquí): previews de Cloudflare Pages |
 | `.github/instructions/` | Reglas por tipo de archivo: TypeScript/React, garita, página del pase, design system, E2E |
 | `.github/agents/` | Agentes `planificador-frontend` y `revisor-frontend` |
 | `.github/prompts/` | Comandos `/fe-planificar`, `/fe-implementar`, `/fe-revisar-pr`, `/fe-desatascar` |
