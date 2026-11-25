@@ -81,6 +81,29 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: make size
 
+  # E2E (REP-05, SPEC §13.1): la imagen real del backend en docker compose. Aún no es un check
+  # requerido del ruleset. Si el paquete de GHCR no es público, el repo frontend necesita acceso
+  # de lectura al paquete (docs/KICKOFF.md); el token del workflow basta para descargarlo.
+  e2e:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: read
+      packages: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: pnpm/action-setup@73e46992e05b19abd31f2f3c20e0e7370d762115 # v6.1.1
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Iniciar sesión en GHCR
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: echo "${GITHUB_TOKEN}" | docker login ghcr.io --username "${GITHUB_ACTOR}" --password-stdin
+      - run: make e2e
+
   # OSV-Scanner y gitleaks se descargan fijados por versión y SHA-256; no se usa la acción oficial
   # de OSV porque envía datos a un servicio externo.
   security:

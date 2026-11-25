@@ -3,11 +3,6 @@
 
 PNPM ?= pnpm
 
-define pending
-	@echo "ERROR: 'make $(1)' todavía no está implementado: lo implementa el issue $(2) ($(3))." >&2
-	@exit 1
-endef
-
 help:
 	@echo "Targets: setup dev test lint typecheck build format size security api-client e2e"
 
@@ -50,4 +45,4 @@ api-client:
 	$(PNPM) --filter @atrio/api-client generate
 
 e2e:
-	$(call pending,e2e,#23,FR-10a)
+	scripts/e2e.sh

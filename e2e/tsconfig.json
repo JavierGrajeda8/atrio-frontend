@@ -1,0 +1,8 @@
+{
+  "extends": "@atrio/config/tsconfig.base.json",
+  "compilerOptions": {
+    "lib": ["ES2022", "DOM"],
+    "types": ["node"]
+  },
+  "include": ["*.ts", "tests"]
+}

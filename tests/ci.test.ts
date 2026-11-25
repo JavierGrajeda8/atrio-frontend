@@ -11,10 +11,26 @@ describe("ci.yml", () => {
   const ci = readFileSync(join(workflowsDir, "ci.yml"), "utf-8");
 
   it("define los checks con nombres estables para el ruleset", () => {
-    const jobs = [...ci.slice(ci.indexOf("\njobs:")).matchAll(/^ {2}([a-z-]+):\s*$/gm)].map(
+    const jobs = [...ci.slice(ci.indexOf("\njobs:")).matchAll(/^ {2}([a-z0-9-]+):\s*$/gm)].map(
       (match) => match[1],
     );
-    expect(jobs).toEqual(["lint", "typecheck", "test", "build", "size", "security", "secrets"]);
+    expect(jobs).toEqual([
+      "lint",
+      "typecheck",
+      "test",
+      "build",
+      "size",
+      "e2e",
+      "security",
+      "secrets",
+    ]);
+  });
+
+  it("corre make e2e en el job e2e con permiso de lectura de paquetes", () => {
+    const job = ci.slice(ci.indexOf("\n  e2e:"), ci.indexOf("\n  security:"));
+    expect(job).toMatch(/- run: make e2e\b/);
+    expect(job).toMatch(/packages: read/);
+    expect(job).not.toMatch(/packages: write|contents: write/);
   });
 
   it("corre make size en el job size", () => {

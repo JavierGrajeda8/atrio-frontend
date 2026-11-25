@@ -1,0 +1,66 @@
+name: atrio-e2e
+
+# Entorno E2E (REP-05, SPEC §13.1): la imagen publicada del backend contra PostgreSQL 17 real, con
+# migraciones y datos sintéticos. Nada de mocks. Lo levanta `make e2e` (scripts/e2e.sh).
+# Todo escucha solo en 127.0.0.1. Credenciales sintéticas, válidas únicamente en este entorno.
+
+x-backend: &backend
+  image: ${E2E_BACKEND_IMAGE:-ghcr.io/javiergrajeda8/atrio-backend:main}
+  pull_policy: missing
+  # Mismo endurecimiento que la imagen en producción (SEC-82).
+  read_only: true
+  tmpfs: [/tmp]
+  cap_drop: [ALL]
+  security_opt: ["no-new-privileges:true"]
+  environment: &backend-env
+    ATRIO_ENVIRONMENT: local
+    ATRIO_DATABASE_URL: postgresql+asyncpg://atrio_app:atrio_dev_only@postgres:5432/atrio
+    ATRIO_MIGRATION_DATABASE_URL: postgresql+asyncpg://atrio_migrator:atrio_dev_only@postgres:5432/atrio
+
+services:
+  postgres:
+    image: postgres:17
+    environment:
+      POSTGRES_USER: atrio
+      POSTGRES_PASSWORD: atrio_dev_only
+      POSTGRES_DB: atrio
+    volumes:
+      # Roles y dueño de la base (copias de atrio-backend/dev/db): solo corren al crear la base.
+      - ./db/01-roles.sql:/docker-entrypoint-initdb.d/01-roles.sql:ro
+      - ./db/02-database.sql:/docker-entrypoint-initdb.d/02-database.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U atrio -d atrio"]
+      interval: 2s
+      timeout: 5s
+      retries: 30
+
+  migrate:
+    <<: *backend
+    command: ["alembic", "upgrade", "head"]
+    depends_on:
+      postgres: { condition: service_healthy }
+    restart: "no"
+
+  seed:
+    <<: *backend
+    command: ["python", "-m", "atrio.seed"]
+    depends_on:
+      migrate: { condition: service_completed_successfully }
+    restart: "no"
+
+  api:
+    <<: *backend
+    ports:
+      - "127.0.0.1:${E2E_API_PORT:-8000}:8000"
+    depends_on:
+      seed: { condition: service_completed_successfully }
+    healthcheck:
+      # La imagen no trae curl ni wget.
+      test:
+        - CMD
+        - python
+        - -c
+        - "import urllib.request,sys; sys.exit(0 if urllib.request.urlopen('http://127.0.0.1:8000/healthz', timeout=3).status == 200 else 1)"
+      interval: 2s
+      timeout: 5s
+      retries: 30

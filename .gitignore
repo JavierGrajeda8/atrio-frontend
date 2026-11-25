@@ -10,3 +10,5 @@ coverage/
 # Cliente de API generado desde openapi/openapi.json (REP-07): nunca se versiona.
 packages/api-client/src/generated/
 packages/api-client/.contract-check/
+test-results/
+playwright-report/
