@@ -11,6 +11,10 @@ E2E_BACKEND_IMAGE=atrio-backend:local make e2e   # una imagen propia (docker bui
 
 Requisitos: Docker en marcha. Si el paquete de GHCR no es público, antes: `docker login ghcr.io` con un token con permiso `read:packages`.
 
+## Autenticación en las pruebas
+
+Todavía no hay login (M1). Cada corrida genera un par de claves **Ed25519 efímero** (`support/gen-keys.mjs`, en un directorio temporal que se borra al terminar): la pública se configura en la API (`ATRIO_JWT_PUBLIC_KEY`) y la privada solo la leen las pruebas para firmar sus tokens (`support/jwt.ts`, `sub` = un usuario del seed, ids en `support/seed.ts`). Ninguna clave se versiona. Las pruebas usan el cliente generado `@atrio/api-client`, el mismo que usarán las apps.
+
 ## Archivos
 
 | Archivo | Qué es |

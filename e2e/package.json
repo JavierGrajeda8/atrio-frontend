@@ -11,5 +11,8 @@
     "@atrio/config": "workspace:*",
     "@playwright/test": "^1.65.1",
     "@types/node": "^22"
+  },
+  "dependencies": {
+    "@atrio/api-client": "workspace:^"
   }
 }

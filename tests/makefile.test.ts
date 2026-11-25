@@ -1,3 +1,4 @@
+import { execFileSync } from "node:child_process";
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 
@@ -45,5 +46,28 @@ describe("make e2e (FR-10a, REP-05)", () => {
     expect(script).toContain("down --volumes");
     expect(script).toContain("SELECT count(*) FROM residentials");
     expect(script).toContain("playwright test");
+  });
+
+  it("el par de claves de los tokens de prueba es efímero: se genera, se usa y se borra (FR-10b)", () => {
+    expect(script).toContain("gen-keys.mjs");
+    expect(script).toContain("mktemp -d");
+    expect(script).toContain('rm -rf "${keydir}"');
+    // Al backend solo llega la pública, y solo a la API (no a migrate ni a seed).
+    expect(script).toContain('E2E_JWT_PUBLIC_KEY="$(cat "${keydir}/public.pem")"');
+    expect(script).not.toMatch(/E2E_JWT_PUBLIC_KEY=.*private/);
+    expect(compose.match(/ATRIO_JWT_PUBLIC_KEY/g)).toHaveLength(1);
+    expect(compose).not.toMatch(/PRIVATE/i);
+    const api = compose.slice(compose.indexOf("\n  api:"));
+    expect(api).toContain("ATRIO_JWT_PUBLIC_KEY: ${E2E_JWT_PUBLIC_KEY:-}");
+  });
+
+  it("no hay ninguna clave privada versionada", () => {
+    const files = execFileSync("git", ["ls-files", "-z"], { encoding: "utf-8" })
+      .split("\0")
+      .filter(Boolean);
+    expect(files.filter((file) => /\.(pem|key|p12)$/i.test(file))).toEqual([]);
+    for (const file of files.filter((f) => f.startsWith("e2e/") || f.startsWith("scripts/"))) {
+      expect(readFileSync(file, "utf-8"), file).not.toMatch(/-----BEGIN [A-Z ]*PRIVATE KEY-----/);
+    }
   });
 });
