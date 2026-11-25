@@ -1,5 +1,5 @@
 import type { MessageId } from "@atrio/i18n";
-import statusCodes from "./status-codes.json";
+import statusCodes from "./status-codes.json" with { type: "json" };
 
 /**
  * Códigos estables de la plataforma (API-03). El contrato publica `code` solo como `string`, así

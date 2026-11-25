@@ -14,13 +14,22 @@ export E2E_API_PORT="${E2E_API_PORT:-8000}"
 command -v docker >/dev/null || { echo "Falta docker: make e2e levanta el backend con docker compose." >&2; exit 1; }
 docker info >/dev/null 2>&1 || { echo "El daemon de Docker no está corriendo." >&2; exit 1; }
 
+keydir="$(mktemp -d)"
 cleanup() {
   status=$?
   if [ "${status}" -ne 0 ]; then "${compose[@]}" logs --no-color --tail 60 >&2 || true; fi
   "${compose[@]}" down --volumes --remove-orphans >/dev/null 2>&1 || true
+  rm -rf "${keydir}"
   exit "${status}"
 }
 trap cleanup EXIT
+
+# Par de claves EFÍMERO para firmar los tokens de prueba (el login real llega en M1). La pública
+# va a la API; la privada solo la leen las pruebas y se borra al terminar. Nunca se versiona.
+node e2e/support/gen-keys.mjs "${keydir}"
+E2E_JWT_PUBLIC_KEY="$(cat "${keydir}/public.pem")"
+export E2E_JWT_PUBLIC_KEY
+export E2E_JWT_PRIVATE_KEY_FILE="${keydir}/private.pem"
 
 if [ -z "${E2E_BACKEND_IMAGE:-}" ]; then
   # `:main` cambia con cada merge del backend: siempre la última.

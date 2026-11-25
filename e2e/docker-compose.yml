@@ -50,6 +50,10 @@ services:
 
   api:
     <<: *backend
+    environment:
+      <<: *backend-env
+      # Clave PÚBLICA efímera de esta corrida (la genera scripts/e2e.sh); solo la API la necesita.
+      ATRIO_JWT_PUBLIC_KEY: ${E2E_JWT_PUBLIC_KEY:-}
     ports:
       - "127.0.0.1:${E2E_API_PORT:-8000}:8000"
     depends_on:

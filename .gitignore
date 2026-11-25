@@ -12,3 +12,4 @@ packages/api-client/src/generated/
 packages/api-client/.contract-check/
 test-results/
 playwright-report/
+*.pem
