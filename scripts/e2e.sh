@@ -41,6 +41,11 @@ if [ -z "${E2E_BACKEND_IMAGE:-}" ]; then
   }
 fi
 
+# Las pruebas de navegador (axe, guard sin red) corren contra las apps construidas, servidas con
+# sus `dist/_headers` reales (FR-09); y necesitan Chromium (no-op si ya está instalado).
+pnpm -r --filter "./apps/*" build
+pnpm --filter @atrio/e2e exec playwright install chromium
+
 # Entorno limpio: sin restos de una corrida anterior.
 "${compose[@]}" down --volumes --remove-orphans >/dev/null 2>&1 || true
 # `--wait` falla si PostgreSQL no queda sano, si `migrate` o `seed` terminan con error o si la
